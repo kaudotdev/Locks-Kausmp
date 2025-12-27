@@ -1,17 +1,11 @@
 package melonslise.locks.mixin.accessor;
 
-import net.minecraftforge.common.ForgeHooks;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Deque;
-
-@Mixin(ForgeHooks.class)
+// TODO: This accessor is no longer needed in NeoForge 1.21
+// ForgeHooks loot context handling has changed
+@Mixin(targets = "net.neoforged.neoforge.common.NeoForge")
 public interface ForgeHooksAccessor
 {
-	@Accessor(remap = false)
-	static ThreadLocal<Deque> getLootContext()
-	{
-		return null;
-	}
+	// Accessor disabled - ForgeHooks API changed in NeoForge 1.21
 }

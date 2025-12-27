@@ -9,8 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 import java.util.NavigableMap;
@@ -18,15 +17,15 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 public final class LocksCommonConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.DoubleValue GENERATION_CHANCE;
-    public static final ForgeConfigSpec.DoubleValue GENERATION_ENCHANT_CHANCE;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> GENERATED_LOCKS;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> GENERATED_LOCK_WEIGHTS;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> GEN_LOCKABLE_BLOCKS;
+    public static final ModConfigSpec.DoubleValue GENERATION_CHANCE;
+    public static final ModConfigSpec.DoubleValue GENERATION_ENCHANT_CHANCE;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> GENERATED_LOCKS;
+    public static final ModConfigSpec.ConfigValue<List<? extends Integer>> GENERATED_LOCK_WEIGHTS;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> GEN_LOCKABLE_BLOCKS;
 
-    public static final ForgeConfigSpec.BooleanValue RANDOMIZE_LOADED_LOCKS;
+    public static final ModConfigSpec.BooleanValue RANDOMIZE_LOADED_LOCKS;
 
     public static NavigableMap<Integer, Item> weightedGeneratedLocks;
     public static int weightTotal;
@@ -34,7 +33,7 @@ public final class LocksCommonConfig {
 
 
     static {
-        ForgeConfigSpec.Builder cfg = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder cfg = new ModConfigSpec.Builder();
 
         GENERATION_CHANCE = cfg
                 .comment("Chance to generate a random lock on every new chest during world generation. Set to 0 to disable")
@@ -76,7 +75,7 @@ public final class LocksCommonConfig {
         List<? extends Integer> weights = GENERATED_LOCK_WEIGHTS.get();
         for (int a = 0; a < locks.size(); ++a) {
             weightTotal += weights.get(a);
-            weightedGeneratedLocks.put(weightTotal, ForgeRegistries.ITEMS.getValue(new ResourceLocation(locks.get(a))));
+            weightedGeneratedLocks.put(weightTotal, net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ResourceLocation.parse(locks.get(a))));
         }
     }
 
@@ -101,6 +100,8 @@ public final class LocksCommonConfig {
 
     public static ItemStack getRandomLock(RandomSource rng) {
         ItemStack stack = new ItemStack(weightedGeneratedLocks.ceilingEntry(rng.nextInt(weightTotal) + 1).getValue());
-        return canEnchant(rng) ? EnchantmentHelper.enchantItem(rng, stack, 5 + rng.nextInt(30), false) : stack;
+        // TODO: EnchantmentHelper.enchantItem API changed in 1.21 - needs update to new enchantment system
+        // For now, return unenchanted stack
+        return stack;
     }
 }

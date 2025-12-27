@@ -1,48 +1,40 @@
 package melonslise.locks.common.network.toclient;
 
+import melonslise.locks.Locks;
 import melonslise.locks.common.container.LockPickingContainer;
 import melonslise.locks.common.init.LocksContainerTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
+public record TryPinResultPacket(boolean correct, boolean reset) implements CustomPacketPayload {
+    
+    public static final Type<TryPinResultPacket> TYPE = 
+        new Type<>(ResourceLocation.fromNamespaceAndPath(Locks.ID, "try_pin_result"));
 
-public class TryPinResultPacket
-{
-	private final boolean correct, reset;
+    public static final StreamCodec<FriendlyByteBuf, TryPinResultPacket> STREAM_CODEC = 
+        StreamCodec.of(
+            (buf, packet) -> {
+                buf.writeBoolean(packet.correct);
+                buf.writeBoolean(packet.reset);
+            },
+            buf -> new TryPinResultPacket(buf.readBoolean(), buf.readBoolean())
+        );
 
-	public TryPinResultPacket(boolean correct, boolean reset)
-	{
-		this.correct = correct;
-		this.reset = reset;
-	}
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
 
-	public static TryPinResultPacket decode(FriendlyByteBuf buf)
-	{
-		return new TryPinResultPacket(buf.readBoolean(), buf.readBoolean());
-	}
-
-	public static void encode(TryPinResultPacket pkt, FriendlyByteBuf buf)
-	{
-		buf.writeBoolean(pkt.correct);
-		buf.writeBoolean(pkt.reset);
-	}
-
-	public static void handle(TryPinResultPacket pkt, Supplier<NetworkEvent.Context> ctx)
-	{
-		// Use runnable, lambda causes issues with class loading
-		ctx.get().enqueueWork(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				AbstractContainerMenu container = Minecraft.getInstance().player.containerMenu;
-				if(container.getType() == LocksContainerTypes.LOCK_PICKING.get())
-					((LockPickingContainer) container).handlePin(pkt.correct, pkt.reset);
-			}
-		});
-		ctx.get().setPacketHandled(true);
-	}
+    public static void handle(TryPinResultPacket packet, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            AbstractContainerMenu container = Minecraft.getInstance().player.containerMenu;
+            if(container.getType() == LocksContainerTypes.LOCK_PICKING.get())
+                ((LockPickingContainer) container).handlePin(packet.correct, packet.reset);
+        });
+    }
 }

@@ -5,25 +5,31 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class LocksServerConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.IntValue MAX_LOCKABLE_VOLUME;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> LOCKABLE_BLOCKS;
-    public static final ForgeConfigSpec.BooleanValue ALLOW_REMOVING_LOCKS;
-    public static final ForgeConfigSpec.BooleanValue PROTECT_LOCKABLES;
-    public static final ForgeConfigSpec.BooleanValue EASY_LOCK;
-    public static final ForgeConfigSpec.BooleanValue STRONG_PREVENTION;
+    public static final ModConfigSpec.IntValue MAX_LOCKABLE_VOLUME;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> LOCKABLE_BLOCKS;
+    public static final ModConfigSpec.BooleanValue ALLOW_REMOVING_LOCKS;
+    public static final ModConfigSpec.BooleanValue PROTECT_LOCKABLES;
+    public static final ModConfigSpec.BooleanValue EASY_LOCK;
+    public static final ModConfigSpec.BooleanValue STRONG_PREVENTION;
+    
+    // New advanced lockpicking config options
+    public static final ModConfigSpec.BooleanValue REQUIRE_OWNER_OFFLINE;
+    public static final ModConfigSpec.DoubleValue BASE_LOCKPICK_CHANCE;
+    public static final ModConfigSpec.DoubleValue LOCKPICK_BREAK_CHANCE;
+    public static final ModConfigSpec.IntValue MAX_TRUSTED_PLAYERS;
 
     public static Pattern[] lockableBlocks;
 
     static {
-        ForgeConfigSpec.Builder cfg = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder cfg = new ModConfigSpec.Builder();
 
         MAX_LOCKABLE_VOLUME = cfg
                 .comment("Maximum amount of blocks that can be locked at once")
@@ -49,6 +55,31 @@ public class LocksServerConfig {
                 .comment("Use stronger checks to prevent blocks on locks from being broken, but its compatibility is unknown")
                 .comment("使用更强的检查来防止上锁方块被破坏，兼容性未知")
                 .define("Stronger Prevention", false);
+        
+        cfg.comment("Advanced Lockpicking System").push("lockpicking");
+        
+        REQUIRE_OWNER_OFFLINE = cfg
+                .comment("Require the lock owner to be offline before allowing lockpicking")
+                .comment("需要锁的拥有者离线才能进行撬锁")
+                .define("Require Owner Offline", false);
+        
+        BASE_LOCKPICK_CHANCE = cfg
+                .comment("Base success chance for lockpicking (0.0 to 1.0)")
+                .comment("撬锁的基础成功率 (0.0 到 1.0)")
+                .defineInRange("Base Lockpick Chance", 0.5, 0.0, 1.0);
+        
+        LOCKPICK_BREAK_CHANCE = cfg
+                .comment("Base chance for lockpick to break on use (0.0 to 1.0, modified by lock difficulty)")
+                .comment("使用时撬锁工具破损的基础概率 (0.0 到 1.0，受锁难度影响)")
+                .defineInRange("Lockpick Break Chance", 0.15, 0.0, 1.0);
+        
+        MAX_TRUSTED_PLAYERS = cfg
+                .comment("Maximum number of players that can be added to a lock's trust list")
+                .comment("可以添加到锁的信任列表中的最大玩家数量")
+                .defineInRange("Max Trusted Players", 10, 1, 100);
+        
+        cfg.pop();
+        
         SPEC = cfg.build();
     }
 

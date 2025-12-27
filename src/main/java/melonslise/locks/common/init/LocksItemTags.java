@@ -1,7 +1,8 @@
 package melonslise.locks.common.init;
 
 import melonslise.locks.Locks;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
@@ -16,6 +17,6 @@ public final class LocksItemTags
 
 	public static TagKey<Item> bind(String name)
 	{
-		return ItemTags.bind(Locks.ID + ":" + name);
+		return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(Locks.ID, name));
 	}
 }

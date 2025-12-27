@@ -46,7 +46,14 @@
 	"locks.tooltip.id": "ID: %s",
 	"locks.tooltip.length":  "Length: %s",
 	"locks.tooltip.strength": "Strength: %s",
+	"locks.tooltip.pins": "Pins: %s",
+	"locks.tooltip.lockstrength": "Lock Strength: %s",
+	"locks.tooltip.sturdy": "Reinforced",
+	"locks.tooltip.owner": "Owner: %s",
+	"locks.tooltip.trusted": "Trusted Players: %s",
 
 	"locks.status.locked": "This block is locked",
-	"locks.status.too_complex": "This lock is too complex for this lock pick"
+	"locks.status.too_complex": "This lock is too complex for this lock pick",
+	"locks.status.owner_online": "The owner of this lock is online!",
+	"locks.status.has_access": "You already have access to this lock"
 }

@@ -6,7 +6,7 @@ import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.capability.ISelection;
 import melonslise.locks.common.config.LocksClientConfig;
 import melonslise.locks.common.config.LocksServerConfig;
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.init.LocksItemTags;
 import melonslise.locks.common.init.LocksItems;
 import melonslise.locks.common.init.LocksSoundEvents;
@@ -21,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.VillagerProfession;
@@ -30,70 +31,53 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.LootTableLoadEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.level.ChunkEvent;
-import net.minecraftforge.event.village.VillagerTradesEvent;
-import net.minecraftforge.event.village.WandererTradesEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.LootTableLoadEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.village.VillagerTradesEvent;
+import net.neoforged.neoforge.event.village.WandererTradesEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventPriority;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-@Mod.EventBusSubscriber(modid = Locks.ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class LocksForgeEvents {
     public static final Component LOCKED_MESSAGE = Component.translatable(Locks.ID + ".status.locked");
 
     private LocksForgeEvents() {
     }
 
-    @SubscribeEvent
-    public static void attachCapabilitiesToWorld(AttachCapabilitiesEvent<Level> e) {
-        LocksCapabilities.attachToWorld(e);
-    }
-
-    @SubscribeEvent
-    public static void attachCapabilitiesToChunk(AttachCapabilitiesEvent<LevelChunk> e) {
-        LocksCapabilities.attachToChunk(e);
-    }
-
-    @SubscribeEvent
-    public static void attachCapabilitiesToEntity(AttachCapabilitiesEvent<Entity> e) {
-        LocksCapabilities.attachToEntity(e);
-    }
+    // AttachCapabilitiesEvent no longer exists in NeoForge 1.21 - use Data Attachments instead
+    // Data Attachments are registered in LocksAttachments.java and automatically attached
 
 	/*
-	@SubscribeEvent(priority = EventPriority.HIGH)
+	
 	public static void onBiomeLoad(BiomeLoadingEvent e)
 	{
 		LocksConfiguredFeatures.addTo(e);
 	}
 	*/
 
-    @SubscribeEvent
+    
     public static void onLootTableLoad(LootTableLoadEvent e) {
         // Only modify if it was a vanilla chest loot table
         ResourceLocation name = e.getName();
         if (!name.getNamespace().equals("minecraft") || !name.getPath().startsWith("chests"))
             return;
         // And only if there is a corresponding inject table...
-        ResourceLocation injectLoc = new ResourceLocation(Locks.ID, "loot_tables/inject/" + name.getPath() + ".json");
+        ResourceLocation injectLoc = ResourceLocation.fromNamespaceAndPath(Locks.ID, "loot_tables/inject/" + name.getPath() + ".json");
         if (LocksUtil.resourceManager.getResource(injectLoc).isEmpty())
             return;
         // todo (kota): bring back
 
     }
 
-    @SubscribeEvent
+    
     public static void addVillagerTrades(VillagerTradesEvent e) {
         if (e.getType() != VillagerProfession.TOOLSMITH)
             return;
@@ -114,7 +98,7 @@ public final class LocksForgeEvents {
         trades.add(new VillagerTrades.ItemsForEmeralds(new ItemStack(LocksItems.STEEL_LOCK_MECHANISM.get()), 8, 1, 8, 30, 0.2f));
     }
 
-    @SubscribeEvent
+    
     public static void addWandererTrades(WandererTradesEvent e) {
         List<VillagerTrades.ItemListing> trades;
         trades = e.getGenericTrades();
@@ -126,23 +110,23 @@ public final class LocksForgeEvents {
         trades.add(new VillagerTrades.EnchantedItemForEmeralds(LocksItems.DIAMOND_LOCK.get(), 28, 4, 1));
     }
 
-    @SubscribeEvent
+    
     public static void onChunkUnload(ChunkEvent.Unload e) {
         LevelChunk ch = (LevelChunk) e.getChunk();
-        ILockableHandler handler = ch.getLevel().getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
-        ch.getCapability(LocksCapabilities.LOCKABLE_STORAGE).orElse(null).get().values().forEach(lkb ->
+        ILockableHandler handler = ch.getLevel().getData(LocksAttachments.LOCKABLE_HANDLER);
+        ch.getData(LocksAttachments.LOCKABLE_STORAGE).get().values().forEach(lkb ->
         {
             handler.getLoaded().remove(lkb.id);
             lkb.deleteObserver(handler);
         });
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    
     public static void onRightClick(PlayerInteractEvent.RightClickBlock e) {
         BlockPos pos = e.getPos();
         Level world = e.getLevel();
         Player player = e.getEntity();
-        ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
+        ILockableHandler handler = world.getData(LocksAttachments.LOCKABLE_HANDLER);
         Lockable[] intersect = handler.getInChunk(pos).values().stream().filter(lkb -> lkb.bb.intersects(pos)).toArray(Lockable[]::new);
         if (intersect.length == 0)
             return;
@@ -154,14 +138,14 @@ public final class LocksForgeEvents {
 //        }
         if (e.getHand() != InteractionHand.MAIN_HAND) // FIXME Better way to prevent firing multiple times
         {
-            e.setUseBlock(Event.Result.DENY);
+            e.setCanceled(true);
             return;
         }
         ItemStack stack = e.getItemStack();
         Optional<Lockable> locked = Arrays.stream(intersect).filter(LocksPredicates.LOCKED).findFirst();
         if (locked.isPresent()) {
             Lockable lkb = locked.get();
-            e.setUseBlock(Event.Result.DENY);
+            e.setCanceled(true);
             Item item = stack.getItem();
             // FIXME erase this ugly ass hard coded shit from the face of the earth and make a proper way to do this (maybe mixin to where the right click event is fired from)
             if (!stack.is(LocksItemTags.LOCK_PICKS) && item != LocksItems.MASTER_KEY.get() && (!stack.is(LocksItemTags.KEYS) || LockingItem.getOrSetId(stack) != lkb.lock.id) && (item != LocksItems.KEY_RING.get() || !KeyRingItem.containsId(stack, lkb.lock.id))) {
@@ -177,7 +161,7 @@ public final class LocksForgeEvents {
             Lockable[] match = Arrays.stream(intersect).filter(LocksPredicates.NOT_LOCKED).toArray(Lockable[]::new);
             if (match.length == 0)
                 return;
-            e.setUseBlock(Event.Result.DENY);
+            e.setCanceled(true);
             world.playSound(player, pos, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 0.8f, 0.8f + world.random.nextFloat() * 0.4f);
             player.swing(InteractionHand.MAIN_HAND);
             if (!world.isClientSide)
@@ -188,14 +172,12 @@ public final class LocksForgeEvents {
         }
     }
 
-    @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent e) {
-        if (e.phase != Phase.START)
-            return;
-        ISelection select = e.player.getCapability(LocksCapabilities.SELECTION).orElse(null);
+    
+    public static void onPlayerTick(PlayerTickEvent.Post e) {
+        ISelection select = e.getEntity().getData(LocksAttachments.SELECTION);
         if (select == null || select.get() == null)
             return;
-        for (ItemStack stack : e.player.getHandSlots())
+        for (ItemStack stack : e.getEntity().getHandSlots())
             if (stack.is(LocksItemTags.LOCKS))
                 return;
         select.set(null);
@@ -207,12 +189,12 @@ public final class LocksForgeEvents {
                 LocksUtil.lockedAndRelated(player.level(), pos);
     }
 
-    @SubscribeEvent
+    
     public static void onBlockBreaking(PlayerEvent.BreakSpeed e) {
         e.setCanceled(canBreakLockable(e.getEntity(), e.getPosition().get()));
     }
 
-    @SubscribeEvent
+    
     public static void onBlockBreak(BlockEvent.BreakEvent e) {
         e.setCanceled(canBreakLockable(e.getPlayer(), e.getPos()));
     }

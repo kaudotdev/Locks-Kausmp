@@ -1,6 +1,5 @@
 package melonslise.locks.common.item;
 
-import melonslise.locks.common.capability.CapabilityProvider;
 import melonslise.locks.common.capability.KeyRingInventory;
 import melonslise.locks.common.container.KeyRingContainer;
 import melonslise.locks.common.init.LocksSoundEvents;
@@ -18,10 +17,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.network.NetworkHooks;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,18 +33,21 @@ public class KeyRingItem extends Item
 		this.rows = rows;
 	}
 
-	@Override
-	public ICapabilityProvider initCapabilities(ItemStack stack, CompoundTag nbt)
-	{
-		return new CapabilityProvider(ForgeCapabilities.ITEM_HANDLER, new KeyRingInventory(stack, this.rows, 9));
-	}
+	// TODO: Implement item data attachment for key ring inventory
+	// @Override
+	// public ICapabilityProvider initCapabilities(ItemStack stack, CompoundTag nbt)
+	// {
+	// 	return new CapabilityProvider(ForgeCapabilities.ITEM_HANDLER, new KeyRingInventory(stack, this.rows, 9));
+	// }
 
 	public static boolean containsId(ItemStack stack, int id)
 	{
-		IItemHandler inv = stack.getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
-		for(int a = 0; a < inv.getSlots(); ++a)
-			if(LockingItem.getOrSetId(inv.getStackInSlot(a)) == id)
-				return true;
+		IItemHandler inv = stack.getCapability(Capabilities.ItemHandler.ITEM);
+		if (inv != null) {
+			for(int a = 0; a < inv.getSlots(); ++a)
+				if(LockingItem.getOrSetId(inv.getStackInSlot(a)) == id)
+					return true;
+		}
 		return false;
 	}
 
@@ -56,7 +56,9 @@ public class KeyRingItem extends Item
 	{
 		ItemStack stack = player.getItemInHand(hand);
 		if(!player.level().isClientSide)
-			NetworkHooks.openScreen((ServerPlayer) player, new KeyRingContainer.Provider(stack), new KeyRingContainer.Writer(hand));
+			player.openMenu(new KeyRingContainer.Provider(stack), buf -> {
+				new KeyRingContainer.Writer(hand).accept(buf);
+			});
 		return new InteractionResultHolder<>(InteractionResult.PASS, stack);
 	}
 
@@ -65,7 +67,12 @@ public class KeyRingItem extends Item
 	{
 		Level world = ctx.getLevel();
 		BlockPos pos = ctx.getClickedPos();
-		IItemHandler inv = ctx.getItemInHand().getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
+		// TODO: Implement Item Data Attachment for KeyRing inventory
+		// For now, commented out as ForgeCapabilities no longer exists
+		// IItemHandler inv = ctx.getItemInHand().getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
+		IItemHandler inv = null; // Temporary until Item Data Attachment is implemented
+		if(inv == null)
+			return InteractionResult.PASS;
 		List<Lockable> intersect = LocksUtil.intersecting(world, pos).collect(Collectors.toList());
 		if(intersect.isEmpty())
 			return InteractionResult.PASS;

@@ -3,21 +3,20 @@ package melonslise.locks.common.capability;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import melonslise.locks.Locks;
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.util.Lockable;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 
 /*
  * Internal storage for lockables with almost no handling logic
  * Also stores lockables which are shared by multiple chunks. Duplicate shared lockables are handled by checking if they have already been loaded before
  */
-@AutoRegisterCapability
 public class LockableStorage implements ILockableStorage {
-    public static final ResourceLocation ID = new ResourceLocation(Locks.ID, "lockable_storage");
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Locks.ID, "lockable_storage");
 
     public final LevelChunk chunk;
 
@@ -45,7 +44,7 @@ public class LockableStorage implements ILockableStorage {
     }
 
     @Override
-    public ListTag serializeNBT() {
+    public ListTag serializeNBT(HolderLookup.Provider registries) {
         ListTag list = new ListTag();
         for (Lockable lkb : this.lockables.values())
             list.add(Lockable.toNbt(lkb));
@@ -53,8 +52,14 @@ public class LockableStorage implements ILockableStorage {
     }
 
     @Override
-    public void deserializeNBT(ListTag nbt) {
-        ILockableHandler handler = this.chunk.getLevel().getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
+    public void deserializeNBT(HolderLookup.Provider registries, ListTag nbt) {
+        if (this.chunk == null || this.chunk.getLevel() == null) {
+            return;
+        }
+        ILockableHandler handler = this.chunk.getLevel().getData(LocksAttachments.LOCKABLE_HANDLER);
+        if (handler == null) {
+            return;
+        }
         Int2ObjectMap<Lockable> lkbs = handler.getLoaded();
         for (int a = 0; a < nbt.size(); ++a) {
             CompoundTag nbt1 = nbt.getCompound(a);

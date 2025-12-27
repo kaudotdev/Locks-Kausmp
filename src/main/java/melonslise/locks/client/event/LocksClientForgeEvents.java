@@ -9,7 +9,7 @@ import melonslise.locks.client.util.LocksClientUtil;
 import melonslise.locks.common.capability.ISelection;
 import melonslise.locks.common.config.LocksClientConfig;
 import melonslise.locks.common.config.LocksServerConfig;
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.init.LocksItemTags;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.client.Minecraft;
@@ -26,24 +26,24 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.List;
 
-@Mod.EventBusSubscriber(modid = Locks.ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+// Event registration done manually in Locks.java mod constructor
 public final class LocksClientForgeEvents {
     public static Lockable tooltipLockable;
 
@@ -51,11 +51,13 @@ public final class LocksClientForgeEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent e) {
-        Minecraft mc = Minecraft.getInstance();
-        if (e.phase != TickEvent.Phase.START || mc.level == null || mc.isPaused())
-            return;
-        mc.level.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null).getLoaded().values().forEach(lkb -> lkb.tick());
+    public static void onClientTick(LevelTickEvent.Post e) {
+        if (e.getLevel().isClientSide()) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.level == null || mc.isPaused())
+                return;
+            mc.level.getData(LocksAttachments.LOCKABLE_HANDLER).getLoaded().values().forEach(lkb -> lkb.tick());
+        }
     }
 
     @SubscribeEvent
@@ -81,19 +83,20 @@ public final class LocksClientForgeEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiOverlayEvent.Pre e) {
+    public static void onRenderOverlay(RenderGuiEvent.Pre e) {
         if (!LocksClientConfig.OVERLAY.get()) return;
         Minecraft mc = Minecraft.getInstance();
-        // if(e.getType() != RenderGuiOverlayEvent.ElementType.ALL || tooltipLockable == null)
         if (tooltipLockable == null)
             return;
         if (holdingPick(mc.player)) {
             PoseStack mtx = e.getGuiGraphics().pose();
-            Vector3f vec = LocksClientUtil.worldToScreen(tooltipLockable.getLockState(mc.level).pos, e.getPartialTick());
+            float partialTick = e.getPartialTick().getGameTimeDeltaPartialTick(true);
+            Vector3f vec = LocksClientUtil.worldToScreen(tooltipLockable.getLockState(mc.level).pos, partialTick);
             if (vec.z() < 0d) {
                 mtx.pushPose();
                 mtx.translate(vec.x(), vec.y(), 0f);
-                renderHudTooltip(mtx, Lists.transform(tooltipLockable.stack.getTooltipLines(mc.player, mc.options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL), Component::getVisualOrderText), mc.font);
+                var tooltipContext = Item.TooltipContext.of(mc.player.level());
+                renderHudTooltip(mtx, Lists.transform(tooltipLockable.stack.getTooltipLines(tooltipContext, mc.player, mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL), Component::getVisualOrderText), mc.font);
                 mtx.popPose();
             }
         }
@@ -107,7 +110,7 @@ public final class LocksClientForgeEvents {
 
         double dMin = 0d;
 
-        for (Lockable lkb : mc.level.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null).getLoaded().values()) {
+        for (Lockable lkb : mc.level.getData(LocksAttachments.LOCKABLE_HANDLER).getLoaded().values()) {
             Lockable.State state = lkb.getLockState(mc.level);
             if (state == null || !state.inRange(o) || !state.inView(ch))
                 continue;
@@ -150,7 +153,7 @@ public final class LocksClientForgeEvents {
     public static void renderSelection(PoseStack mtx, MultiBufferSource buf) {
         Minecraft mc = Minecraft.getInstance();
         Vec3 o = LocksClientUtil.getCamera().getPosition();
-        ISelection select = mc.player.getCapability(LocksCapabilities.SELECTION).orElse(null);
+        ISelection select = mc.player.getData(LocksAttachments.SELECTION);
         if (select == null)
             return;
         BlockPos pos = select.get();
@@ -182,8 +185,7 @@ public final class LocksClientForgeEvents {
 
         mtx.pushPose();
 
-        BufferBuilder buf = Tesselator.getInstance().getBuilder();
-        buf.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder buf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         LocksClientUtil.square(buf, mtx, 0f, 0f, 4f, 0.05f, 0f, 0.3f, 0.8f);
         LocksClientUtil.line(buf, mtx, 1f, -1f, x / 3f + 0.6f, y / 2f, 2f, 0.05f, 0f, 0.3f, 0.8f);
         LocksClientUtil.line(buf, mtx, x / 3f, y / 2f, x - 3f, y / 2f, 2f, 0.05f, 0f, 0.3f, 0.8f);
@@ -203,12 +205,12 @@ public final class LocksClientForgeEvents {
         RenderSystem.defaultBlendFunc();
         // RenderSystem.shadeModel(7425);
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferUploader.draw(buf.end());
+        BufferUploader.drawWithShader(buf.buildOrThrow());
         // RenderSystem.shadeModel(7424);
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.disableBlend();
         RenderSystem.setShaderTexture(0, 7424);
-        MultiBufferSource.BufferSource buf1 = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource buf1 = MultiBufferSource.immediate(new ByteBufferBuilder(256));
 
         Matrix4f last = mtx.last().pose();
         for (int a = 0; a < lines.size(); ++a) {

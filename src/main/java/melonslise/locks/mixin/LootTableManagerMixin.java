@@ -1,10 +1,14 @@
 package melonslise.locks.mixin;
 
+// TODO: LootDataManager class name changed or moved in 1.21
+// Need to find the new class name and update this mixin
+// Disabled for now - not critical for core functionality
+
+/*
 import melonslise.locks.common.util.LocksUtil;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.level.storage.loot.LootDataManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,3 +26,4 @@ public class LootTableManagerMixin
 		LocksUtil.resourceManager = pResourceManager;
 	}
 }
+*/

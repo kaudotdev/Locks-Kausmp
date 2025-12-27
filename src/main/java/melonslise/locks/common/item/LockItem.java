@@ -4,7 +4,7 @@ import melonslise.locks.Locks;
 import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.capability.ISelection;
 import melonslise.locks.common.config.LocksServerConfig;
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.init.LocksSoundEvents;
 import melonslise.locks.common.util.Cuboid6i;
 import melonslise.locks.common.util.Lock;
@@ -13,6 +13,7 @@ import melonslise.locks.common.util.Transform;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
@@ -22,6 +23,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ChestBlock;
@@ -30,9 +32,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class LockItem extends LockingItem
@@ -40,25 +43,40 @@ public class LockItem extends LockingItem
 	public final int length;
 	public final int enchantmentValue;
 	public final int resistance;
+	public final int pins;
+	public final int strength;
+	public final boolean sturdy;
 
 	public LockItem(int length, int enchVal, int resist, Properties props)
+	{
+		this(length, enchVal, resist, Math.min(Math.max(length, 3), 7), 1, false, props);
+	}
+	
+	public LockItem(int length, int enchVal, int resist, int pins, int strength, boolean sturdy, Properties props)
 	{
 		super(props);
 		this.length = length;
 		this.enchantmentValue = enchVal;
 		this.resistance = resist;
+		this.pins = Math.min(Math.max(pins, 3), 7);
+		this.strength = Math.min(Math.max(strength, 1), 5);
+		this.sturdy = sturdy;
 	}
 
 	public static final String KEY_OPEN = "Open";
+	private static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = new DecimalFormat("0.##");
 
 	public static boolean isOpen(ItemStack stack)
 	{
-		return stack.getOrCreateTag().getBoolean(KEY_OPEN);
+		CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+		return nbt.getBoolean(KEY_OPEN);
 	}
 
 	public static void setOpen(ItemStack stack, boolean open)
 	{
-		stack.getOrCreateTag().putBoolean(KEY_OPEN, open);
+		CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+		nbt.putBoolean(KEY_OPEN, open);
+		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
 	}
 
 	public static final String KEY_LENGTH = "Length";
@@ -66,9 +84,12 @@ public class LockItem extends LockingItem
 	// WARNING: EXPECTS LOCKITEM STACK
 	public static byte getOrSetLength(ItemStack stack)
 	{
-		CompoundTag nbt = stack.getOrCreateTag();
+		CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
 		if(!nbt.contains(KEY_LENGTH))
+		{
 			nbt.putByte(KEY_LENGTH, (byte) ((LockItem) stack.getItem()).length);
+			stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
+		}
 		return nbt.getByte(KEY_LENGTH);
 	}
 
@@ -83,7 +104,7 @@ public class LockItem extends LockingItem
 	{
 		Level world = ctx.getLevel();
 		BlockPos pos = ctx.getClickedPos();
-		if (!LocksServerConfig.canLock(world, pos) ||  ctx.getLevel().getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null).getInChunk(pos).values().stream().anyMatch(lkb -> lkb.bb.intersects(pos)))
+		if (!LocksServerConfig.canLock(world, pos) ||  ctx.getLevel().getData(LocksAttachments.LOCKABLE_HANDLER).getInChunk(pos).values().stream().anyMatch(lkb -> lkb.bb.intersects(pos)))
 			return InteractionResult.PASS;
 		return LocksServerConfig.EASY_LOCK.get() ? this.easyLock(ctx) : this.freeLock(ctx);
 	}
@@ -92,7 +113,7 @@ public class LockItem extends LockingItem
 	{
 		Player player = ctx.getPlayer();
 		BlockPos pos = ctx.getClickedPos();
-		ISelection select = player.getCapability(LocksCapabilities.SELECTION).orElse(null);
+		ISelection select = player.getData(LocksAttachments.SELECTION);
 		BlockPos pos1 = select.get();
 		if (pos1 == null)
 			select.set(pos);
@@ -107,8 +128,8 @@ public class LockItem extends LockingItem
 			ItemStack stack = ctx.getItemInHand();
 			ItemStack lockStack = stack.copy();
 			lockStack.setCount(1);
-			ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
-			if (!handler.add(new Lockable(new Cuboid6i(pos1, pos), Lock.from(stack), Transform.fromDirection(ctx.getClickedFace(), player.getDirection().getOpposite()), lockStack, world)))
+			ILockableHandler handler = world.getData(LocksAttachments.LOCKABLE_HANDLER);
+			if (!handler.add(new Lockable(new Cuboid6i(pos1, pos), Lock.from(stack, player), Transform.fromDirection(ctx.getClickedFace(), player.getDirection().getOpposite()), lockStack, world)))
 				return InteractionResult.PASS;
 			if (!player.isCreative())
 				stack.shrink(1);
@@ -142,8 +163,8 @@ public class LockItem extends LockingItem
 		ItemStack stack = ctx.getItemInHand();
 		ItemStack lockStack = stack.copy();
 		lockStack.setCount(1);
-		ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
-		if (!handler.add(new Lockable(new Cuboid6i(pos, pos1), Lock.from(stack), Transform.fromDirection(ctx.getClickedFace(), player.getDirection().getOpposite()), lockStack, world)))
+		ILockableHandler handler = world.getData(LocksAttachments.LOCKABLE_HANDLER);
+		if (!handler.add(new Lockable(new Cuboid6i(pos, pos1), Lock.from(stack, player), Transform.fromDirection(ctx.getClickedFace(), player.getDirection().getOpposite()), lockStack, world)))
 			return InteractionResult.PASS;
 		if (!player.isCreative())
 			stack.shrink(1);
@@ -175,9 +196,11 @@ public class LockItem extends LockingItem
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void appendHoverText(ItemStack stack, Level world, List<Component> lines, TooltipFlag flag)
+	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag)
 	{
-		super.appendHoverText(stack, world, lines, flag);
-		lines.add(Component.translatable(Locks.ID + ".tooltip.length", ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(stack.hasTag() && stack.getTag().contains(KEY_LENGTH) ? stack.getTag().getByte(KEY_LENGTH) : this.length)).withStyle(ChatFormatting.DARK_GREEN));
+		super.appendHoverText(stack, context, lines, flag);
+		CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+		byte length = nbt.contains(KEY_LENGTH) ? nbt.getByte(KEY_LENGTH) : (byte) this.length;
+		lines.add(Component.translatable(Locks.ID + ".tooltip.length", ATTRIBUTE_MODIFIER_FORMAT.format(length)).withStyle(ChatFormatting.DARK_GREEN));
 	}
 }

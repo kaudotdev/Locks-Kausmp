@@ -6,13 +6,13 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class KeyRingScreen extends AbstractContainerScreen<KeyRingContainer>
 {
-	public static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/container/generic_54.png");
+	public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/container/generic_54.png");
 
 	public KeyRingScreen(KeyRingContainer cont, Inventory inv, Component title)
 	{
@@ -24,7 +24,7 @@ public class KeyRingScreen extends AbstractContainerScreen<KeyRingContainer>
 	@Override
 	public void render(GuiGraphics mtx, int mouseX, int mouseY, float partialTick)
 	{
-		this.renderBackground(mtx);
+		this.renderBackground(mtx, 0, 0, 0);
 		super.render(mtx, mouseX, mouseY, partialTick);
 		this.renderTooltip(mtx, mouseX, mouseY);
 	}

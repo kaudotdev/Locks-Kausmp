@@ -2,7 +2,7 @@ package melonslise.locks.mixin;
 
 import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.config.LocksCommonConfig;
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -20,7 +20,7 @@ public class ServerWorldMixin {
     private void sendBlockUpdated(BlockPos pos, BlockState oldState, BlockState newState, int flag, CallbackInfo ci) {
         if (LocksCommonConfig.matchString(oldState.getBlock()) && LocksCommonConfig.matchString(newState.getBlock())) return;
         ServerLevel world = (ServerLevel) (Object) this;
-        ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
+        ILockableHandler handler = world.getData(LocksAttachments.LOCKABLE_HANDLER);
         // create buffer list because otherwise we will be deleting elements while iterating (BAD!!)
         handler.getInChunk(pos).values().stream().filter(lkb -> lkb.bb.intersects(pos)).toList().forEach(lkb ->
         {

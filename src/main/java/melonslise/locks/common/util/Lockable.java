@@ -1,6 +1,6 @@
 package melonslise.locks.common.util;
 
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.item.LockItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -15,8 +15,8 @@ import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.*;
 
@@ -80,7 +80,7 @@ public class Lockable extends Observable implements Observer
 
 	public Lockable(Cuboid6i bb, Lock lock, Transform tr, ItemStack stack, Level world)
 	{
-		this(bb, lock, tr, stack, world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null).nextId());
+		this(bb, lock, tr, stack, world.getData(LocksAttachments.LOCKABLE_HANDLER).nextId());
 	}
 
 	public Lockable(Cuboid6i bb, Lock lock, Transform tr, ItemStack stack, int id)
@@ -97,7 +97,7 @@ public class Lockable extends Observable implements Observer
 
 	public static Lockable fromNbt(CompoundTag nbt)
 	{
-		return new Lockable(Cuboid6i.fromNbt(nbt.getCompound(KEY_BB)), Lock.fromNbt(nbt.getCompound(KEY_LOCK)), Transform.values()[(int) nbt.getByte(KEY_TRANSFORM)], ItemStack.of(nbt.getCompound(KEY_STACK)), nbt.getInt(KEY_ID));
+		return new Lockable(Cuboid6i.fromNbt(nbt.getCompound(KEY_BB)), Lock.fromNbt(nbt.getCompound(KEY_LOCK)), Transform.values()[(int) nbt.getByte(KEY_TRANSFORM)], ItemStack.parseOptional(net.minecraft.core.HolderLookup.Provider.create(java.util.stream.Stream.empty()), nbt.getCompound(KEY_STACK)), nbt.getInt(KEY_ID));
 	}
 
 	public static CompoundTag toNbt(Lockable lkb)
@@ -106,7 +106,9 @@ public class Lockable extends Observable implements Observer
 		nbt.put(KEY_BB, Cuboid6i.toNbt(lkb.bb));
 		nbt.put(KEY_LOCK, Lock.toNbt(lkb.lock));
 		nbt.putByte(KEY_TRANSFORM, (byte) lkb.tr.ordinal());
-		nbt.put(KEY_STACK, lkb.stack.serializeNBT());
+		CompoundTag stackNbt = new CompoundTag();
+		lkb.stack.save(net.minecraft.core.HolderLookup.Provider.create(java.util.stream.Stream.empty()), stackNbt);
+		nbt.put(KEY_STACK, stackNbt);
 		nbt.putInt(KEY_ID, lkb.id);
 		return nbt;
 	}
@@ -118,15 +120,19 @@ public class Lockable extends Observable implements Observer
 
 	public static Lockable fromBuf(FriendlyByteBuf buf)
 	{
-		return new Lockable(Cuboid6i.fromBuf(buf), Lock.fromBuf(buf), buf.readEnum(Transform.class), buf.readItem(), buf.readInt());
+		// Cast to RegistryFriendlyByteBuf for STREAM_CODEC
+		net.minecraft.network.RegistryFriendlyByteBuf registryBuf = (net.minecraft.network.RegistryFriendlyByteBuf) buf;
+		return new Lockable(Cuboid6i.fromBuf(buf), Lock.fromBuf(buf), buf.readEnum(Transform.class), ItemStack.STREAM_CODEC.decode(registryBuf), buf.readInt());
 	}
 
 	public static void toBuf(FriendlyByteBuf buf, Lockable lkb)
 	{
+		// Cast to RegistryFriendlyByteBuf for STREAM_CODEC
+		net.minecraft.network.RegistryFriendlyByteBuf registryBuf = (net.minecraft.network.RegistryFriendlyByteBuf) buf;
 		Cuboid6i.toBuf(buf, lkb.bb);
 		Lock.toBuf(buf, lkb.lock);
 		buf.writeEnum(lkb.tr);
-		buf.writeItem(lkb.stack);
+		ItemStack.STREAM_CODEC.encode(registryBuf, lkb.stack);
 		buf.writeInt(lkb.id);
 	}
 

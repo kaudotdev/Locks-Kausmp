@@ -5,19 +5,19 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import melonslise.locks.Locks;
 import melonslise.locks.common.config.LocksServerConfig;
-import melonslise.locks.common.init.LocksCapabilities;
-import melonslise.locks.common.init.LocksNetwork;
-import melonslise.locks.common.init.LocksPacketDistributors;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.network.toclient.AddLockablePacket;
 import melonslise.locks.common.network.toclient.RemoveLockablePacket;
 import melonslise.locks.common.network.toclient.UpdateLockablePacket;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.common.capabilities.AutoRegisterCapability;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.Objects;
@@ -28,10 +28,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Manages and handles logic for all LOADED lockables by accessing internal ILockableStorage objects.
  * This means that there is no way of getting a list of ALL lockables in a world like before
  */
-@AutoRegisterCapability
 public class LockableHandler implements ILockableHandler
 {
-	public static final ResourceLocation ID = new ResourceLocation(Locks.ID, "lockable_handler");
+	public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Locks.ID, "lockable_handler");
 
 	public final Level world;
 
@@ -58,7 +57,11 @@ public class LockableHandler implements ILockableHandler
 	@Override
 	public Int2ObjectMap<Lockable> getInChunk(BlockPos pos)
 	{
-		return this.world.hasChunkAt(pos) ? this.world.getChunkAt(pos).getCapability(LocksCapabilities.LOCKABLE_STORAGE).orElse(null).get() : Int2ObjectMaps.emptyMap();
+		if (!this.world.hasChunkAt(pos)) {
+			return Int2ObjectMaps.emptyMap();
+		}
+		ILockableStorage storage = this.world.getChunkAt(pos).getData(LocksAttachments.LOCKABLE_STORAGE);
+		return storage != null ? storage.get() : Int2ObjectMaps.emptyMap();
 	}
 
 	@Override
@@ -70,7 +73,10 @@ public class LockableHandler implements ILockableHandler
 		{
 			try {
 				LevelChunk levelChunk = this.world.getChunk(x, z);
-				ILockableStorage st = levelChunk.getCapability(LocksCapabilities.LOCKABLE_STORAGE).orElseThrow(NullPointerException::new);
+				ILockableStorage st = levelChunk.getData(LocksAttachments.LOCKABLE_STORAGE);
+				if (st == null) {
+					return null;
+				}
 				return st.get().values().stream().anyMatch(lkb1 -> lkb1.bb.intersects(lkb.bb)) ? null : st;
 			} catch (Exception e){
 				Locks.LOGGER.warn("Chunk not gen");
@@ -89,8 +95,15 @@ public class LockableHandler implements ILockableHandler
 		// Do client/server extras
 		if(this.world.isClientSide)
 			lkb.swing(10);
-		else
-			LocksNetwork.MAIN.send(LocksPacketDistributors.TRACKING_AREA.with(() -> sts.stream().map(st -> ((LockableStorage) st).chunk)), new AddLockablePacket(lkb));
+		else {
+			// Send packet to all players tracking the chunks
+			for(ILockableStorage st : sts) {
+				LevelChunk chunk = ((LockableStorage) st).chunk;
+				if (this.world instanceof ServerLevel serverLevel) {
+					PacketDistributor.sendToPlayersTrackingChunk(serverLevel, chunk.getPos(), new AddLockablePacket(lkb));
+				}
+			}
+		}
 		return true;
 	}
 
@@ -103,15 +116,24 @@ public class LockableHandler implements ILockableHandler
 		List<LevelChunk> chs = lkb.bb.containedChunksTo((x, z) -> this.world.hasChunk(x, z) ? this.world.getChunk(x, z) : null, true);
 
 		// Remove from chunk
-		for(int a = 0; a < chs.size(); ++a)
-			chs.get(a).getCapability(LocksCapabilities.LOCKABLE_STORAGE).orElse(null).remove(id);
+		for(int a = 0; a < chs.size(); ++a) {
+			ILockableStorage storage = chs.get(a).getData(LocksAttachments.LOCKABLE_STORAGE);
+			if (storage != null) {
+				storage.remove(id);
+			}
+		}
 		// Remove from world
 		this.lockables.remove(id);
 		lkb.deleteObserver(this);
 		// Do client/server extras
 		if(this.world.isClientSide)
 			return true;
-		LocksNetwork.MAIN.send(LocksPacketDistributors.TRACKING_AREA.with(() -> chs.stream()), new RemoveLockablePacket(id));
+		// Send packet to all players tracking the chunks
+		if (this.world instanceof ServerLevel serverLevel) {
+			for(LevelChunk ch : chs) {
+				PacketDistributor.sendToPlayersTrackingChunk(serverLevel, ch.getPos(), new RemoveLockablePacket(id));
+			}
+		}
 		return true;
 	}
 
@@ -121,17 +143,24 @@ public class LockableHandler implements ILockableHandler
 		if(this.world.isClientSide || !(o instanceof Lockable))
 			return;
 		Lockable lockable = (Lockable) o;
-		LocksNetwork.MAIN.send(LocksPacketDistributors.TRACKING_AREA.with(() -> lockable.bb.containedChunksTo((x, z) -> this.world.hasChunk(x, z) ? this.world.getChunk(x, z) : null, false).stream().filter(Objects::nonNull)), new UpdateLockablePacket(lockable));
+		if (this.world instanceof ServerLevel serverLevel) {
+			List<LevelChunk> chunks = lockable.bb.containedChunksTo((x, z) -> this.world.hasChunk(x, z) ? this.world.getChunk(x, z) : null, false);
+			for(LevelChunk chunk : chunks) {
+				if (chunk != null) {
+					PacketDistributor.sendToPlayersTrackingChunk(serverLevel, chunk.getPos(), new UpdateLockablePacket(lockable));
+				}
+			}
+		}
 	}
 
 	@Override
-	public IntTag serializeNBT()
+	public IntTag serializeNBT(HolderLookup.Provider registries)
 	{
 		return IntTag.valueOf(this.lastId.get());
 	}
 
 	@Override
-	public void deserializeNBT(IntTag nbt)
+	public void deserializeNBT(HolderLookup.Provider registries, IntTag nbt)
 	{
 		this.lastId.set(nbt.getAsInt());
 	}

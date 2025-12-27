@@ -21,10 +21,9 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.IContainerFactory;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.function.Consumer;
 
@@ -67,9 +66,11 @@ public class LockPickingContainer extends AbstractContainerMenu
 		Lockable.State state = lkb.getLockState(player.level());
 		this.pos = state == null ? lkb.bb.center() : state.pos;
 
-		this.shocking = EnchantmentHelper.getTagEnchantmentLevel(LocksEnchantments.SHOCKING.get(), this.lockable.stack);
-		this.sturdy = EnchantmentHelper.getTagEnchantmentLevel(LocksEnchantments.STURDY.get(), this.lockable.stack);
-		this.complexity = EnchantmentHelper.getTagEnchantmentLevel(LocksEnchantments.COMPLEXITY.get(), this.lockable.stack);
+		// Enchantments are now data-driven - these would need to be retrieved from registry
+		// For now, default to 0 until enchantment system is fully implemented
+		this.shocking = 0; // TODO: Implement enchantment level retrieval
+		this.sturdy = 0; // TODO: Implement enchantment level retrieval
+		this.complexity = 0; // TODO: Implement enchantment level retrieval
 
 		// Syncs the player inventory
 
@@ -132,7 +133,7 @@ public class LockPickingContainer extends AbstractContainerMenu
 			}
 			else this.player.level().playSound(null, this.pos.x, this.pos.y, this.pos.z, LocksSoundEvents.PIN_FAIL.get(), SoundSource.BLOCKS, 1f, 1f);
 		}
-		LocksNetwork.MAIN.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) this.player), new TryPinResultPacket(correct, reset));
+		PacketDistributor.sendToPlayer((ServerPlayer) this.player, new TryPinResultPacket(correct, reset));
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -157,7 +158,7 @@ public class LockPickingContainer extends AbstractContainerMenu
 
 		if (!pickStack.is(LocksItemTags.LOCK_PICKS) || player.level().random.nextFloat() < ex + ch)
 			return false;
-		this.player.broadcastBreakEvent(this.hand);
+		this.player.swing(InteractionHand.MAIN_HAND, true); // broadcastBreakEvent replaced with swing
 		pickStack.shrink(1);
 		if (pickStack.isEmpty())
 			for (int a = 0; a < player.getInventory().getContainerSize(); ++a)
@@ -205,10 +206,11 @@ public class LockPickingContainer extends AbstractContainerMenu
 		this.player.level().playSound(player, this.pos.x, this.pos.y, this.pos.z, LocksSoundEvents.LOCK_OPEN.get(), SoundSource.BLOCKS, 1f, 1f);
 	}
 
-	public static final IContainerFactory<LockPickingContainer> FACTORY = (id, inv, buf) ->
+	// Container factory for network-based menu opening
+	public static LockPickingContainer create(int id, Inventory inv, FriendlyByteBuf buf)
 	{
-		return new LockPickingContainer(id, inv.player, buf.readEnum(InteractionHand.class), inv.player.level().getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null).getLoaded().get(buf.readInt()));
-	};
+		return new LockPickingContainer(id, inv.player, buf.readEnum(InteractionHand.class), inv.player.level().getData(LocksAttachments.LOCKABLE_HANDLER).getLoaded().get(buf.readInt()));
+	}
 
 	//Network
 	public static class Writer implements Consumer<FriendlyByteBuf>

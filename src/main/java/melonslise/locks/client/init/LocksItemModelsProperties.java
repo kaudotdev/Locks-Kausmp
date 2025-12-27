@@ -6,9 +6,8 @@ import melonslise.locks.common.item.LockItem;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public final class LocksItemModelsProperties
@@ -17,8 +16,13 @@ public final class LocksItemModelsProperties
 
 	public static void register()
 	{
-		ItemProperties.register(LocksItems.KEY_RING.get(), new ResourceLocation(Locks.ID, "keys"), (stack, world, entity, speed) ->
+		// TODO: Implement with Item Data Attachments
+		// KeyRing inventory needs to be migrated to NeoForge item data attachments
+		ItemProperties.register(LocksItems.KEY_RING.get(), ResourceLocation.fromNamespaceAndPath(Locks.ID, "keys"), (stack, world, entity, speed) ->
 		{
+			// Temporarily return 0 until item data attachment is implemented
+			return 0.0f;
+			/* OLD CODE using ForgeCapabilities:
 			return stack.getCapability(ForgeCapabilities.ITEM_HANDLER)
 				.map(inv ->
 				{
@@ -29,8 +33,9 @@ public final class LocksItemModelsProperties
 					return (float) keys / inv.getSlots();
 				})
 				.orElse(0f);
+			*/
 		});
-		ResourceLocation id = new ResourceLocation(Locks.ID, "open");
+		ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Locks.ID, "open");
 		ItemPropertyFunction getter = (stack, world, entity, speed) -> LockItem.isOpen(stack) ? 1f : 0f;
 		ItemProperties.register(LocksItems.WOOD_LOCK.get(), id, getter);
 		ItemProperties.register(LocksItems.IRON_LOCK.get(), id, getter);

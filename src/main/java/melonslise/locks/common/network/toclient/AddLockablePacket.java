@@ -1,43 +1,39 @@
 package melonslise.locks.common.network.toclient;
 
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.Locks;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
+public record AddLockablePacket(Lockable lockable) implements CustomPacketPayload {
+    
+    public static final Type<AddLockablePacket> TYPE = 
+        new Type<>(ResourceLocation.fromNamespaceAndPath(Locks.ID, "add_lockable"));
 
-public class AddLockablePacket
-{
-	private final Lockable lockable;
+    public static final StreamCodec<FriendlyByteBuf, AddLockablePacket> STREAM_CODEC = 
+        StreamCodec.of(
+            (buf, packet) -> Lockable.toBuf(buf, packet.lockable),
+            buf -> new AddLockablePacket(Lockable.fromBuf(buf))
+        );
 
-	public AddLockablePacket(Lockable lkb)
-	{
-		this.lockable = lkb;
-	}
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
 
-	public static AddLockablePacket decode(FriendlyByteBuf buf)
-	{
-		return new AddLockablePacket(Lockable.fromBuf(buf));
-	}
-
-	public static void encode(AddLockablePacket pkt, FriendlyByteBuf buf)
-	{
-		Lockable.toBuf(buf, pkt.lockable);
-	}
-
-	public static void handle(AddLockablePacket pkt, Supplier<NetworkEvent.Context> ctx)
-	{
-		// Use runnable, lambda causes issues with class loading
-		ctx.get().enqueueWork(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				Minecraft.getInstance().level.getCapability(LocksCapabilities.LOCKABLE_HANDLER).ifPresent(handler -> handler.add(pkt.lockable));
-			}
-		});
-		ctx.get().setPacketHandled(true);
-	}
+    public static void handle(AddLockablePacket packet, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (Minecraft.getInstance().level != null) {
+                var handler = Minecraft.getInstance().level.getData(LocksAttachments.LOCKABLE_HANDLER);
+                if (handler != null) {
+                    handler.add(packet.lockable);
+                }
+            }
+        });
+    }
 }
