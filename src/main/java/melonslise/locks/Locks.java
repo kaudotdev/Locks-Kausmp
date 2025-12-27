@@ -46,13 +46,13 @@ public final class Locks
 		
 		// Register FORGE bus events
 		IEventBus forgeBus = NeoForge.EVENT_BUS;
-		forgeBus.addListener(LocksForgeEvents::onInteract);
-		forgeBus.addListener(LocksForgeEvents::onUseItem);
-		forgeBus.addListener(LocksForgeEvents::onLeftClick);
+		forgeBus.addListener(LocksForgeEvents::onRightClick);
 		forgeBus.addListener(LocksForgeEvents::onChunkUnload);
 		forgeBus.addListener(LocksForgeEvents::onPlayerTick);
-		forgeBus.addListener(LocksForgeEvents::onVillagerTrades);
-		forgeBus.addListener(LocksForgeEvents::onWandererTrades);
+		forgeBus.addListener(LocksForgeEvents::addVillagerTrades);
+		forgeBus.addListener(LocksForgeEvents::addWandererTrades);
+		forgeBus.addListener(LocksForgeEvents::onBlockBreaking);
+		forgeBus.addListener(LocksForgeEvents::onBlockBreak);
 		
 		// Register Data Attachment events
 		forgeBus.addListener(LocksCapabilities::onWorldLoad);
