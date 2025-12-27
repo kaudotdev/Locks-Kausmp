@@ -21,6 +21,6 @@ public class ChunkManagerMixin
 	private void playerLoadedChunk(ServerPlayer player, MutableObject<ClientboundLevelChunkWithLightPacket> pkts, LevelChunk ch, CallbackInfo ci)
 	{
 		ch.getData(LocksAttachments.LOCKABLE_STORAGE).get().values()
-			.forEach(lkb -> LocksNetwork.MAIN.send(PacketDistributor.TRACKING_CHUNK.with(() -> ch), new AddLockableToChunkPacket(lkb, ch)));
+			.forEach(lkb -> PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) player.level(), ch.getPos(), new AddLockableToChunkPacket(lkb, ch)));
 	}
 }

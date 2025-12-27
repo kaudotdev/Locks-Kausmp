@@ -31,7 +31,7 @@ public class ChunkMixin
 			st.add(lkb);
 			handler.getLoaded().put(lkb.id, lkb);
 			lkb.addObserver(handler);
-			LocksNetwork.MAIN.send(PacketDistributor.TRACKING_CHUNK.with(() -> ch), new AddLockableToChunkPacket(lkb, ch));
+			PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) world, ch.getPos(), new AddLockableToChunkPacket(lkb, ch));
 		}
 	}
 }
