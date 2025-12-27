@@ -42,7 +42,8 @@ public class KeyRingInventory implements IItemHandlerModifiable
 			CompoundTag nbt = list.getCompound(a);
 			if(nbt.getInt("Slot") != slot)
 				continue;
-			return ItemStack.parseOptional(net.minecraft.core.HolderLookup.Provider.create(), nbt);
+			// Use EMPTY registry access for simple deserialization
+			return ItemStack.parseOptional(net.minecraft.core.HolderLookup.Provider.create(java.util.stream.Stream.empty()), nbt);
 		}
 		return ItemStack.EMPTY;
 	}
@@ -56,7 +57,7 @@ public class KeyRingInventory implements IItemHandlerModifiable
 		{
 			nbt = new CompoundTag();
 			nbt.putInt("Slot", slot);
-			stack.save(net.minecraft.core.HolderLookup.Provider.create(), nbt);
+			stack.save(net.minecraft.core.HolderLookup.Provider.create(java.util.stream.Stream.empty()), nbt);
 		}
 		// Get or create custom data
 		net.minecraft.world.item.component.CustomData customData = this.stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY);

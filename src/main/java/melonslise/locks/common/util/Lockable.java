@@ -97,7 +97,7 @@ public class Lockable extends Observable implements Observer
 
 	public static Lockable fromNbt(CompoundTag nbt)
 	{
-		return new Lockable(Cuboid6i.fromNbt(nbt.getCompound(KEY_BB)), Lock.fromNbt(nbt.getCompound(KEY_LOCK)), Transform.values()[(int) nbt.getByte(KEY_TRANSFORM)], ItemStack.parseOptional(net.minecraft.core.HolderLookup.Provider.create(), nbt.getCompound(KEY_STACK)), nbt.getInt(KEY_ID));
+		return new Lockable(Cuboid6i.fromNbt(nbt.getCompound(KEY_BB)), Lock.fromNbt(nbt.getCompound(KEY_LOCK)), Transform.values()[(int) nbt.getByte(KEY_TRANSFORM)], ItemStack.parseOptional(net.minecraft.core.HolderLookup.Provider.create(java.util.stream.Stream.empty()), nbt.getCompound(KEY_STACK)), nbt.getInt(KEY_ID));
 	}
 
 	public static CompoundTag toNbt(Lockable lkb)
@@ -107,7 +107,7 @@ public class Lockable extends Observable implements Observer
 		nbt.put(KEY_LOCK, Lock.toNbt(lkb.lock));
 		nbt.putByte(KEY_TRANSFORM, (byte) lkb.tr.ordinal());
 		CompoundTag stackNbt = new CompoundTag();
-		lkb.stack.save(net.minecraft.core.HolderLookup.Provider.create(), stackNbt);
+		lkb.stack.save(net.minecraft.core.HolderLookup.Provider.create(java.util.stream.Stream.empty()), stackNbt);
 		nbt.put(KEY_STACK, stackNbt);
 		nbt.putInt(KEY_ID, lkb.id);
 		return nbt;
