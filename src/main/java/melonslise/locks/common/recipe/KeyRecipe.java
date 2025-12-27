@@ -3,21 +3,23 @@ package melonslise.locks.common.recipe;
 import melonslise.locks.common.init.LocksItems;
 import melonslise.locks.common.init.LocksRecipeSerializers;
 import melonslise.locks.common.item.LockingItem;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
 public class KeyRecipe extends CustomRecipe
 {
-	public KeyRecipe(ResourceLocation id, CraftingBookCategory pCategory)
+	public KeyRecipe(CraftingBookCategory pCategory)
 	{
-		super(id, pCategory);
+		super(pCategory);
 	}
 
 	@Override
@@ -27,17 +29,18 @@ public class KeyRecipe extends CustomRecipe
 	}
 
 	@Override
-	public boolean matches(CraftingContainer inv, Level world)
+	public boolean matches(CraftingInput input, Level world)
 	{
 		boolean hasLocking = false;
 		int blanks = 0;
 
-		for(int a = 0; a < inv.getContainerSize(); ++a)
+		for(int a = 0; a < input.size(); ++a)
 		{
-			ItemStack stack = inv.getItem(a);
+			ItemStack stack = input.getItem(a);
 			if(stack.isEmpty())
 				continue;
-			if(stack.hasTag() && stack.getTag().contains(LockingItem.KEY_ID))
+			// Updated for 1.21: ItemStack.hasTag() no longer exists, using has(DataComponents.CUSTOM_DATA)
+			if(stack.has(DataComponents.CUSTOM_DATA) && stack.get(DataComponents.CUSTOM_DATA).contains(LockingItem.KEY_ID))
 			{
 				if(hasLocking)
 					return false;
@@ -52,17 +55,18 @@ public class KeyRecipe extends CustomRecipe
 	}
 
 	@Override
-	public ItemStack assemble(CraftingContainer inv, RegistryAccess pRegistryAccess)
+	public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries)
 	{
 		ItemStack locking = ItemStack.EMPTY;
 		int blanks = 0;
 
-		for (int a = 0; a < inv.getContainerSize(); ++a)
+		for (int a = 0; a < input.size(); ++a)
 		{
-			ItemStack stack = inv.getItem(a);
+			ItemStack stack = input.getItem(a);
 			if (stack.isEmpty())
 				continue;
-			if (stack.hasTag() && stack.getTag().contains(LockingItem.KEY_ID))
+			// Updated for 1.21: ItemStack.hasTag() no longer exists
+			if (stack.has(DataComponents.CUSTOM_DATA) && stack.get(DataComponents.CUSTOM_DATA).contains(LockingItem.KEY_ID))
 			{
 				if (!locking.isEmpty())
 					return ItemStack.EMPTY;
@@ -80,14 +84,15 @@ public class KeyRecipe extends CustomRecipe
 	}
 
 	@Override
-	public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv)
+	public NonNullList<ItemStack> getRemainingItems(CraftingInput input)
 	{
-		NonNullList<ItemStack> list = NonNullList.withSize(inv.getContainerSize(), ItemStack.EMPTY);
+		NonNullList<ItemStack> list = NonNullList.withSize(input.size(), ItemStack.EMPTY);
 
 		for (int a = 0; a < list.size(); ++a)
 		{
-			ItemStack stack = inv.getItem(a);
-			if(!stack.hasTag() || !stack.getTag().contains(LockingItem.KEY_ID))
+			ItemStack stack = input.getItem(a);
+			// Updated for 1.21: ItemStack.hasTag() no longer exists
+			if(!stack.has(DataComponents.CUSTOM_DATA) || !stack.get(DataComponents.CUSTOM_DATA).contains(LockingItem.KEY_ID))
 				continue;
 			list.set(a, stack.copy());
 			break;

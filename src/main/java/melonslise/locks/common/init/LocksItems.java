@@ -11,21 +11,21 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.function.Supplier;
 
 public final class LocksItems {
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Locks.ID);
 
-    public static final RegistryObject<CreativeModeTab> TAB = TABS.register(Locks.ID,
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register(Locks.ID,
             () -> CreativeModeTab
                     .builder()
                     .icon(() -> new ItemStack(LocksItems.IRON_LOCK.get()))
                     .title(Component.translatable("itemGroup.locks"))
                     .displayItems((parameters, output) -> {
-                        for (RegistryObject<Item> itemRegistryObject : LocksItems.ITEMS.getEntries()) {
-                            output.accept(itemRegistryObject.get());
+                        for (DeferredHolder<Item, ? extends Item> itemHolder : LocksItems.ITEMS.getEntries()) {
+                            output.accept(itemHolder.get());
                         }
                     })
                     .build()
@@ -33,7 +33,7 @@ public final class LocksItems {
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, Locks.ID);
 
-    public static final RegistryObject<Item>
+    public static final DeferredHolder<Item, Item>
             SPRING = add("spring", () -> new Item(new Item.Properties())),
             WOOD_LOCK_MECHANISM = add("wood_lock_mechanism", () -> new Item(new Item.Properties())),
             IRON_LOCK_MECHANISM = add("iron_lock_mechanism", () -> new Item(new Item.Properties())),
@@ -58,12 +58,12 @@ public final class LocksItems {
     private LocksItems() {
     }
 
-    public static void register() {
-        ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
-        TABS.register(FMLJavaModLoadingContext.get().getModEventBus());
+    public static void register(IEventBus bus) {
+        ITEMS.register(bus);
+        TABS.register(bus);
     }
 
-    public static RegistryObject<Item> add(String name, Supplier<Item> itemSupplier) {
+    public static DeferredHolder<Item, Item> add(String name, Supplier<Item> itemSupplier) {
         return ITEMS.register(name, itemSupplier);
     }
 }

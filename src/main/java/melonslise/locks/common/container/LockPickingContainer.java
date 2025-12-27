@@ -23,7 +23,6 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.IContainerFactory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.function.Consumer;
@@ -207,10 +206,11 @@ public class LockPickingContainer extends AbstractContainerMenu
 		this.player.level().playSound(player, this.pos.x, this.pos.y, this.pos.z, LocksSoundEvents.LOCK_OPEN.get(), SoundSource.BLOCKS, 1f, 1f);
 	}
 
-	public static final IContainerFactory<LockPickingContainer> FACTORY = (id, inv, buf) ->
+	// Container factory for network-based menu opening
+	public static LockPickingContainer create(int id, Inventory inv, FriendlyByteBuf buf)
 	{
 		return new LockPickingContainer(id, inv.player, buf.readEnum(InteractionHand.class), inv.player.level().getData(LocksAttachments.LOCKABLE_HANDLER).getLoaded().get(buf.readInt()));
-	};
+	}
 
 	//Network
 	public static class Writer implements Consumer<FriendlyByteBuf>
