@@ -124,13 +124,12 @@ public final class LocksClientUtil
 		float f = 1f / texWidth;
 		float f1 = 1f / texHeight;
 
-		BufferBuilder buf = Tesselator.getInstance().getBuilder();
-		buf.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-		buf.vertex(last, x, y + height, 0f).uv(u * f, (v + height) * f1).color(1f, 1f, 1f, alpha).endVertex();
-		buf.vertex(last, x + width, y + height, 0f).uv((u + width) * f, (v + height) * f1).color(1f, 1f, 1f, alpha).endVertex();
-		buf.vertex(last, x + width, y, 0f).uv((u + width) * f,  v * f1).color(1f, 1f, 1f, alpha).endVertex();
-		buf.vertex(last, x, y, 0f).uv(u * f, v * f1).color(1f, 1f, 1f, alpha).endVertex();
-		buf.end();
+		BufferBuilder buf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+		buf.addVertex(last, x, y + height, 0f).setUv(u * f, (v + height) * f1).setColor(1f, 1f, 1f, alpha);
+		buf.addVertex(last, x + width, y + height, 0f).setUv((u + width) * f, (v + height) * f1).setColor(1f, 1f, 1f, alpha);
+		buf.addVertex(last, x + width, y, 0f).setUv((u + width) * f,  v * f1).setColor(1f, 1f, 1f, alpha);
+		buf.addVertex(last, x, y, 0f).setUv(u * f, v * f1).setColor(1f, 1f, 1f, alpha);
+		BufferUploader.drawWithShader(buf.buildOrThrow());
 		//RenderSystem.enableBlend();
 		//RenderSystem.defaultBlendFunc();
 		//BufferUploader.draw(buf.end());
@@ -148,29 +147,29 @@ public final class LocksClientUtil
 		pX *= width / 2f / pL;
 		pY *= width / 2f / pL;
 
-		buf.vertex(last, x1 + pX, y1 + pY, 0f).color(r, g, b, a).endVertex();
-		buf.vertex(last, x1 - pX, y1 - pY, 0f).color(r, g, b, a).endVertex();
-		buf.vertex(last, x2 - pX, y2 - pY, 0f).color(r, g, b, a).endVertex();
-		buf.vertex(last, x2 + pX, y2 + pY, 0f).color(r, g, b, a).endVertex();
+		buf.addVertex(last, x1 + pX, y1 + pY, 0f).setColor(r, g, b, a);
+		buf.addVertex(last, x1 - pX, y1 - pY, 0f).setColor(r, g, b, a);
+		buf.addVertex(last, x2 - pX, y2 - pY, 0f).setColor(r, g, b, a);
+		buf.addVertex(last, x2 + pX, y2 + pY, 0f).setColor(r, g, b, a);
 	}
 
 	public static void square(BufferBuilder buf, PoseStack mtx, float x, float y, float length, float r, float g, float b, float a)
 	{
 		Matrix4f last = mtx.last().pose();
 		length /= 2f;
-		buf.vertex(last, x - length, y - length, 0f).color(r, g, b, a).endVertex();
-		buf.vertex(last, x - length, y + length, 0f).color(r, g, b, a).endVertex();
-		buf.vertex(last, x + length, y + length, 0f).color(r, g, b, a).endVertex();
-		buf.vertex(last, x + length, y - length, 0f).color(r, g, b, a).endVertex();
+		buf.addVertex(last, x - length, y - length, 0f).setColor(r, g, b, a);
+		buf.addVertex(last, x - length, y + length, 0f).setColor(r, g, b, a);
+		buf.addVertex(last, x + length, y + length, 0f).setColor(r, g, b, a);
+		buf.addVertex(last, x + length, y - length, 0f).setColor(r, g, b, a);
 	}
 
 	public static void vGradient(BufferBuilder bld, PoseStack mtx, int x1, int y1, int x2, int y2, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2)
 	{
 		Matrix4f last = mtx.last().pose();
-		bld.vertex(last, x2, y1, 0f).color(r1, g1, b1, a1).endVertex();
-		bld.vertex(last, x1, y1, 0f).color(r1, g1, b1, a1).endVertex();
-		bld.vertex(last, x1, y2, 0f).color(r2, g2, b2, a2).endVertex();
-		bld.vertex(last, x2, y2, 0f).color(r2, g2, b2, a2).endVertex();
+		bld.addVertex(last, x2, y1, 0f).setColor(r1, g1, b1, a1);
+		bld.addVertex(last, x1, y1, 0f).setColor(r1, g1, b1, a1);
+		bld.addVertex(last, x1, y2, 0f).setColor(r2, g2, b2, a2);
+		bld.addVertex(last, x2, y2, 0f).setColor(r2, g2, b2, a2);
 	}
 
 	public static float lerp(float start, float end, float progress)

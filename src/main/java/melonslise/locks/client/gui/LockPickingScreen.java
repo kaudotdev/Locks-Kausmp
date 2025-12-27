@@ -123,7 +123,7 @@ public class LockPickingScreen extends AbstractContainerScreen<LockPickingContai
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        float pt = this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true); // idk why, but partialTick looks laggy AF... Use getFrameTime instead!
+        float pt = partialTick; // Using partialTick parameter directly
         int cornerX = (this.width - this.imageWidth) / 2;
         int cornerY = (this.height - this.imageHeight) / 2;
 

@@ -12,7 +12,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class KeyRingScreen extends AbstractContainerScreen<KeyRingContainer>
 {
-	public static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/container/generic_54.png");
+	public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/container/generic_54.png");
 
 	public KeyRingScreen(KeyRingContainer cont, Inventory inv, Component title)
 	{

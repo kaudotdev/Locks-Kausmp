@@ -21,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.VillagerProfession;
@@ -137,14 +138,14 @@ public final class LocksForgeEvents {
 //        }
         if (e.getHand() != InteractionHand.MAIN_HAND) // FIXME Better way to prevent firing multiple times
         {
-            e.setUseBlock(InteractionResult.FAIL);
+            e.setUseBlock(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.Result.DENY);
             return;
         }
         ItemStack stack = e.getItemStack();
         Optional<Lockable> locked = Arrays.stream(intersect).filter(LocksPredicates.LOCKED).findFirst();
         if (locked.isPresent()) {
             Lockable lkb = locked.get();
-            e.setUseBlock(InteractionResult.FAIL);
+            e.setUseBlock(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.Result.DENY);
             Item item = stack.getItem();
             // FIXME erase this ugly ass hard coded shit from the face of the earth and make a proper way to do this (maybe mixin to where the right click event is fired from)
             if (!stack.is(LocksItemTags.LOCK_PICKS) && item != LocksItems.MASTER_KEY.get() && (!stack.is(LocksItemTags.KEYS) || LockingItem.getOrSetId(stack) != lkb.lock.id) && (item != LocksItems.KEY_RING.get() || !KeyRingItem.containsId(stack, lkb.lock.id))) {
@@ -160,7 +161,7 @@ public final class LocksForgeEvents {
             Lockable[] match = Arrays.stream(intersect).filter(LocksPredicates.NOT_LOCKED).toArray(Lockable[]::new);
             if (match.length == 0)
                 return;
-            e.setUseBlock(InteractionResult.FAIL);
+            e.setUseBlock(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.Result.DENY);
             world.playSound(player, pos, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 0.8f, 0.8f + world.random.nextFloat() * 0.4f);
             player.swing(InteractionHand.MAIN_HAND);
             if (!world.isClientSide)
