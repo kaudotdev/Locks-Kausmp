@@ -61,6 +61,7 @@ public final class Locks
 		// Register client-side events
 		if (FMLEnvironment.dist == Dist.CLIENT) {
 			LocksClientModEvents.register(modBus);
+			LocksScreens.register(modBus);
 			forgeBus.addListener(LocksClientForgeEvents::onRenderOverlay);
 		}
 	}

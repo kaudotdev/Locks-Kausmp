@@ -26,6 +26,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.state.properties.AttachFace;
@@ -209,7 +210,7 @@ public final class LocksClientForgeEvents {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.disableBlend();
         RenderSystem.setShaderTexture(0, 7424);
-        MultiBufferSource.BufferSource buf1 = MultiBufferSource.immediate(Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP));
+        MultiBufferSource.BufferSource buf1 = MultiBufferSource.immediate(new ByteBufferBuilder(256));
 
         Matrix4f last = mtx.last().pose();
         for (int a = 0; a < lines.size(); ++a) {
