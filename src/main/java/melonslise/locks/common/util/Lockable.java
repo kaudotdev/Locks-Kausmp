@@ -120,15 +120,19 @@ public class Lockable extends Observable implements Observer
 
 	public static Lockable fromBuf(FriendlyByteBuf buf)
 	{
-		return new Lockable(Cuboid6i.fromBuf(buf), Lock.fromBuf(buf), buf.readEnum(Transform.class), ItemStack.STREAM_CODEC.decode(buf), buf.readInt());
+		// Cast to RegistryFriendlyByteBuf for STREAM_CODEC
+		net.minecraft.network.RegistryFriendlyByteBuf registryBuf = (net.minecraft.network.RegistryFriendlyByteBuf) buf;
+		return new Lockable(Cuboid6i.fromBuf(buf), Lock.fromBuf(buf), buf.readEnum(Transform.class), ItemStack.STREAM_CODEC.decode(registryBuf), buf.readInt());
 	}
 
 	public static void toBuf(FriendlyByteBuf buf, Lockable lkb)
 	{
+		// Cast to RegistryFriendlyByteBuf for STREAM_CODEC
+		net.minecraft.network.RegistryFriendlyByteBuf registryBuf = (net.minecraft.network.RegistryFriendlyByteBuf) buf;
 		Cuboid6i.toBuf(buf, lkb.bb);
 		Lock.toBuf(buf, lkb.lock);
 		buf.writeEnum(lkb.tr);
-		ItemStack.STREAM_CODEC.encode(buf, lkb.stack);
+		ItemStack.STREAM_CODEC.encode(registryBuf, lkb.stack);
 		buf.writeInt(lkb.id);
 	}
 

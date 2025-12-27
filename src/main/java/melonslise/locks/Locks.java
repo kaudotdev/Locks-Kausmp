@@ -2,6 +2,7 @@ package melonslise.locks;
 
 import melonslise.locks.client.event.LocksClientForgeEvents;
 import melonslise.locks.client.event.LocksClientModEvents;
+import melonslise.locks.client.init.LocksScreens;
 import melonslise.locks.common.config.LocksClientConfig;
 import melonslise.locks.common.config.LocksCommonConfig;
 import melonslise.locks.common.config.LocksServerConfig;
