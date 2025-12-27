@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class LockableHandler implements ILockableHandler
 {
-	public static final ResourceLocation ID = new ResourceLocation(Locks.ID, "lockable_handler");
+	public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Locks.ID, "lockable_handler");
 
 	public final Level world;
 

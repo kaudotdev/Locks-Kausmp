@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class Selection implements ISelection
 {
-	public static final ResourceLocation ID = new ResourceLocation(Locks.ID, "selection");
+	public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Locks.ID, "selection");
 
 	public BlockPos pos;
 

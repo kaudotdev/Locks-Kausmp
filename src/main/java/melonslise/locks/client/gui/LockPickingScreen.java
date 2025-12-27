@@ -98,7 +98,7 @@ public class LockPickingScreen extends AbstractContainerScreen<LockPickingContai
     }
 
     public static ResourceLocation getTextureFor(ItemStack stack) {
-        return new ResourceLocation(Locks.ID, "textures/gui/" + net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath() + ".png");
+        return ResourceLocation.fromNamespaceAndPath(Locks.ID, "textures/gui/" + net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath() + ".png");
     }
 
     public Sprite addSprite(Sprite sprite) {

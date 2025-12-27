@@ -17,7 +17,7 @@ public final class LocksItemModelsProperties
 
 	public static void register()
 	{
-		ItemProperties.register(LocksItems.KEY_RING.get(), new ResourceLocation(Locks.ID, "keys"), (stack, world, entity, speed) ->
+		ItemProperties.register(LocksItems.KEY_RING.get(), ResourceLocation.fromNamespaceAndPath(Locks.ID, "keys"), (stack, world, entity, speed) ->
 		{
 			return stack.getCapability(ForgeCapabilities.ITEM_HANDLER)
 				.map(inv ->
@@ -30,7 +30,7 @@ public final class LocksItemModelsProperties
 				})
 				.orElse(0f);
 		});
-		ResourceLocation id = new ResourceLocation(Locks.ID, "open");
+		ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Locks.ID, "open");
 		ItemPropertyFunction getter = (stack, world, entity, speed) -> LockItem.isOpen(stack) ? 1f : 0f;
 		ItemProperties.register(LocksItems.WOOD_LOCK.get(), id, getter);
 		ItemProperties.register(LocksItems.IRON_LOCK.get(), id, getter);

@@ -8,7 +8,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig.Type;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.fml.ModContainer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,13 +19,11 @@ public final class Locks
 
 	public static final Logger LOGGER = LogManager.getLogger();
 
-	public Locks()
+	public Locks(IEventBus modBus, ModContainer container)
 	{
 		ModLoadingContext.get().registerConfig(Type.SERVER, LocksServerConfig.SPEC);
 		ModLoadingContext.get().registerConfig(Type.COMMON, LocksCommonConfig.SPEC);
 		ModLoadingContext.get().registerConfig(Type.CLIENT, LocksClientConfig.SPEC);
-
-		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		
 		LocksAttachments.register(modBus);
 		LocksItems.register();

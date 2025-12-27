@@ -15,7 +15,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
  * Also stores lockables which are shared by multiple chunks. Duplicate shared lockables are handled by checking if they have already been loaded before
  */
 public class LockableStorage implements ILockableStorage {
-    public static final ResourceLocation ID = new ResourceLocation(Locks.ID, "lockable_storage");
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Locks.ID, "lockable_storage");
 
     public final LevelChunk chunk;
 
