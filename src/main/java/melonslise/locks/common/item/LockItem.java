@@ -108,7 +108,7 @@ public class LockItem extends LockingItem
 			ItemStack lockStack = stack.copy();
 			lockStack.setCount(1);
 			ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
-			if (!handler.add(new Lockable(new Cuboid6i(pos1, pos), Lock.from(stack), Transform.fromDirection(ctx.getClickedFace(), player.getDirection().getOpposite()), lockStack, world)))
+			if (!handler.add(new Lockable(new Cuboid6i(pos1, pos), Lock.from(stack, player), Transform.fromDirection(ctx.getClickedFace(), player.getDirection().getOpposite()), lockStack, world)))
 				return InteractionResult.PASS;
 			if (!player.isCreative())
 				stack.shrink(1);
@@ -143,7 +143,7 @@ public class LockItem extends LockingItem
 		ItemStack lockStack = stack.copy();
 		lockStack.setCount(1);
 		ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
-		if (!handler.add(new Lockable(new Cuboid6i(pos, pos1), Lock.from(stack), Transform.fromDirection(ctx.getClickedFace(), player.getDirection().getOpposite()), lockStack, world)))
+		if (!handler.add(new Lockable(new Cuboid6i(pos, pos1), Lock.from(stack, player), Transform.fromDirection(ctx.getClickedFace(), player.getDirection().getOpposite()), lockStack, world)))
 			return InteractionResult.PASS;
 		if (!player.isCreative())
 			stack.shrink(1);

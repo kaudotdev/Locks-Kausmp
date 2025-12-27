@@ -1,11 +1,14 @@
 package melonslise.locks.common.item;
 
 import melonslise.locks.Locks;
+import melonslise.locks.common.config.LocksServerConfig;
 import melonslise.locks.common.container.LockPickingContainer;
 import melonslise.locks.common.init.LocksEnchantments;
+import melonslise.locks.common.util.Lock;
 import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LocksPredicates;
 import melonslise.locks.common.util.LocksUtil;
+import melonslise.locks.common.util.TrustManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -30,6 +33,8 @@ import java.util.stream.Collectors;
 public class LockPickItem extends Item
 {
 	public static final Component TOO_COMPLEX_MESSAGE = Component.translatable(Locks.ID + ".status.too_complex");
+	public static final Component OWNER_ONLINE_MESSAGE = Component.translatable(Locks.ID + ".status.owner_online");
+	public static final Component HAS_ACCESS_MESSAGE = Component.translatable(Locks.ID + ".status.has_access");
 
 	public final float strength;
 
@@ -70,6 +75,26 @@ public class LockPickItem extends Item
 		if(match.isEmpty())
 			return InteractionResult.PASS;
 		Lockable lkb = match.get(0);
+		
+		// Check if player already has access (owner or trusted)
+		Lock lock = lkb.lock;
+		if(TrustManager.hasAccess(lock, player))
+		{
+			if(world.isClientSide)
+				player.displayClientMessage(HAS_ACCESS_MESSAGE, true);
+			return InteractionResult.PASS;
+		}
+		
+		// Check if owner is online (if config requires it)
+		if(!world.isClientSide && LocksServerConfig.REQUIRE_OWNER_OFFLINE.get())
+		{
+			if(lock.getOwner() != null && TrustManager.isOwnerOnline(lock, world.getServer()))
+			{
+				player.displayClientMessage(OWNER_ONLINE_MESSAGE, true);
+				return InteractionResult.FAIL;
+			}
+		}
+		
 		if(!canPick(ctx.getItemInHand(), lkb))
 		{
 			if(world.isClientSide)
