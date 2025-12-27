@@ -3,9 +3,8 @@ package melonslise.locks.common.capability;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.nbt.ListTag;
-import net.neoforged.neoforge.common.capabilities.AutoRegisterCapability;
 import net.neoforged.neoforge.common.util.INBTSerializable;
-@AutoRegisterCapability
+
 public interface ILockableStorage extends INBTSerializable<ListTag>
 {
 	Int2ObjectMap<Lockable> get();

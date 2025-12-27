@@ -1,6 +1,6 @@
 package melonslise.locks.common.util;
 
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.item.LockItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -80,7 +80,7 @@ public class Lockable extends Observable implements Observer
 
 	public Lockable(Cuboid6i bb, Lock lock, Transform tr, ItemStack stack, Level world)
 	{
-		this(bb, lock, tr, stack, world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null).nextId());
+		this(bb, lock, tr, stack, world.getData(LocksAttachments.LOCKABLE_HANDLER).nextId());
 	}
 
 	public Lockable(Cuboid6i bb, Lock lock, Transform tr, ItemStack stack, int id)

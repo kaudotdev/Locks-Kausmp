@@ -2,7 +2,7 @@ package melonslise.locks.mixin;
 
 import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.capability.ILockableStorage;
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.init.LocksNetwork;
 import melonslise.locks.common.network.toclient.AddLockableToChunkPacket;
 import melonslise.locks.common.util.ILockableProvider;
@@ -23,8 +23,8 @@ public class ChunkMixin
 	private void init(ServerLevel world, ProtoChunk pChunk, LevelChunk.PostLoadProcessor pPostLoad, CallbackInfo ci)
 	{
 		LevelChunk ch = (LevelChunk) (Object) this;
-		ILockableStorage st = ch.getCapability(LocksCapabilities.LOCKABLE_STORAGE).orElse(null);
-		ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
+		ILockableStorage st = ch.getData(LocksAttachments.LOCKABLE_STORAGE);
+		ILockableHandler handler = world.getData(LocksAttachments.LOCKABLE_HANDLER);
 		// We trust that all checks pass (such as volume and intersect checks) due to this happening only during world gen
 		for(Lockable lkb : ((ILockableProvider) pChunk).getLockables())
 		{

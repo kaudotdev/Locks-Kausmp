@@ -4,11 +4,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.IntTag;
-import net.neoforged.neoforge.common.capabilities.AutoRegisterCapability;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 
 import java.util.Observer;
-@AutoRegisterCapability
+
 public interface ILockableHandler extends INBTSerializable<IntTag>, Observer
 {
 	int nextId();

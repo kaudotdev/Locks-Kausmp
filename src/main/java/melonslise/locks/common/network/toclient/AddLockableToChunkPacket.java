@@ -3,7 +3,7 @@ package melonslise.locks.common.network.toclient;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.capability.ILockableStorage;
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -56,8 +56,8 @@ public class AddLockableToChunkPacket
 			public void run()
 			{
 				Minecraft mc = Minecraft.getInstance();
-				ILockableStorage st = mc.level.getChunk(pkt.x, pkt.z).getCapability(LocksCapabilities.LOCKABLE_STORAGE).orElse(null);
-				ILockableHandler handler = mc.level.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
+				ILockableStorage st = mc.level.getChunk(pkt.x, pkt.z).getData(LocksAttachments.LOCKABLE_STORAGE);
+				ILockableHandler handler = mc.level.getData(LocksAttachments.LOCKABLE_HANDLER);
 				Int2ObjectMap<Lockable> lkbs = handler.getLoaded();
 				Lockable lkb = lkbs.get(pkt.lockable.id);
 				if(lkb == lkbs.defaultReturnValue())

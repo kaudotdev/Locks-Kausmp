@@ -4,9 +4,11 @@ import melonslise.locks.common.config.LocksClientConfig;
 import melonslise.locks.common.config.LocksCommonConfig;
 import melonslise.locks.common.config.LocksServerConfig;
 import melonslise.locks.common.init.*;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig.Type;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,6 +25,9 @@ public final class Locks
 		ModLoadingContext.get().registerConfig(Type.COMMON, LocksCommonConfig.SPEC);
 		ModLoadingContext.get().registerConfig(Type.CLIENT, LocksClientConfig.SPEC);
 
+		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+		
+		LocksAttachments.register(modBus);
 		LocksItems.register();
 		LocksEnchantments.register();
 		LocksSoundEvents.register();

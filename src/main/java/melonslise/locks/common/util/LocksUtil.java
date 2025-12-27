@@ -3,7 +3,7 @@ package melonslise.locks.common.util;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import melonslise.locks.common.config.LocksCommonConfig;
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.mixin.accessor.ForgeHooksAccessor;
 import melonslise.locks.mixin.accessor.LootPoolAccessor;
 import melonslise.locks.mixin.accessor.LootTableAccessor;

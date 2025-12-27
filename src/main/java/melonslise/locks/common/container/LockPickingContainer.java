@@ -207,7 +207,7 @@ public class LockPickingContainer extends AbstractContainerMenu
 
 	public static final IContainerFactory<LockPickingContainer> FACTORY = (id, inv, buf) ->
 	{
-		return new LockPickingContainer(id, inv.player, buf.readEnum(InteractionHand.class), inv.player.level().getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null).getLoaded().get(buf.readInt()));
+		return new LockPickingContainer(id, inv.player, buf.readEnum(InteractionHand.class), inv.player.level().getData(LocksAttachments.LOCKABLE_HANDLER).getLoaded().get(buf.readInt()));
 	};
 
 	//Network

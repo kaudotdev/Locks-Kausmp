@@ -9,7 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import java.util.List;
@@ -18,15 +18,15 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 public final class LocksCommonConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.DoubleValue GENERATION_CHANCE;
-    public static final ForgeConfigSpec.DoubleValue GENERATION_ENCHANT_CHANCE;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> GENERATED_LOCKS;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> GENERATED_LOCK_WEIGHTS;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> GEN_LOCKABLE_BLOCKS;
+    public static final ModConfigSpec.DoubleValue GENERATION_CHANCE;
+    public static final ModConfigSpec.DoubleValue GENERATION_ENCHANT_CHANCE;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> GENERATED_LOCKS;
+    public static final ModConfigSpec.ConfigValue<List<? extends Integer>> GENERATED_LOCK_WEIGHTS;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> GEN_LOCKABLE_BLOCKS;
 
-    public static final ForgeConfigSpec.BooleanValue RANDOMIZE_LOADED_LOCKS;
+    public static final ModConfigSpec.BooleanValue RANDOMIZE_LOADED_LOCKS;
 
     public static NavigableMap<Integer, Item> weightedGeneratedLocks;
     public static int weightTotal;
@@ -34,7 +34,7 @@ public final class LocksCommonConfig {
 
 
     static {
-        ForgeConfigSpec.Builder cfg = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder cfg = new ModConfigSpec.Builder();
 
         GENERATION_CHANCE = cfg
                 .comment("Chance to generate a random lock on every new chest during world generation. Set to 0 to disable")

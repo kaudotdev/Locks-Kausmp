@@ -9,7 +9,7 @@ import melonslise.locks.client.util.LocksClientUtil;
 import melonslise.locks.common.capability.ISelection;
 import melonslise.locks.common.config.LocksClientConfig;
 import melonslise.locks.common.config.LocksServerConfig;
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.init.LocksItemTags;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.client.Minecraft;
@@ -55,7 +55,7 @@ public final class LocksClientForgeEvents {
         Minecraft mc = Minecraft.getInstance();
         if (e.phase != TickEvent.Phase.START || mc.level == null || mc.isPaused())
             return;
-        mc.level.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null).getLoaded().values().forEach(lkb -> lkb.tick());
+        mc.level.getData(LocksAttachments.LOCKABLE_HANDLER).getLoaded().values().forEach(lkb -> lkb.tick());
     }
 
     @SubscribeEvent
@@ -107,7 +107,7 @@ public final class LocksClientForgeEvents {
 
         double dMin = 0d;
 
-        for (Lockable lkb : mc.level.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null).getLoaded().values()) {
+        for (Lockable lkb : mc.level.getData(LocksAttachments.LOCKABLE_HANDLER).getLoaded().values()) {
             Lockable.State state = lkb.getLockState(mc.level);
             if (state == null || !state.inRange(o) || !state.inView(ch))
                 continue;
@@ -150,7 +150,7 @@ public final class LocksClientForgeEvents {
     public static void renderSelection(PoseStack mtx, MultiBufferSource buf) {
         Minecraft mc = Minecraft.getInstance();
         Vec3 o = LocksClientUtil.getCamera().getPosition();
-        ISelection select = mc.player.getCapability(LocksCapabilities.SELECTION).orElse(null);
+        ISelection select = mc.player.getData(LocksAttachments.SELECTION);
         if (select == null)
             return;
         BlockPos pos = select.get();

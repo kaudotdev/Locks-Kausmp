@@ -5,31 +5,31 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class LocksServerConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.IntValue MAX_LOCKABLE_VOLUME;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> LOCKABLE_BLOCKS;
-    public static final ForgeConfigSpec.BooleanValue ALLOW_REMOVING_LOCKS;
-    public static final ForgeConfigSpec.BooleanValue PROTECT_LOCKABLES;
-    public static final ForgeConfigSpec.BooleanValue EASY_LOCK;
-    public static final ForgeConfigSpec.BooleanValue STRONG_PREVENTION;
+    public static final ModConfigSpec.IntValue MAX_LOCKABLE_VOLUME;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> LOCKABLE_BLOCKS;
+    public static final ModConfigSpec.BooleanValue ALLOW_REMOVING_LOCKS;
+    public static final ModConfigSpec.BooleanValue PROTECT_LOCKABLES;
+    public static final ModConfigSpec.BooleanValue EASY_LOCK;
+    public static final ModConfigSpec.BooleanValue STRONG_PREVENTION;
     
     // New advanced lockpicking config options
-    public static final ForgeConfigSpec.BooleanValue REQUIRE_OWNER_OFFLINE;
-    public static final ForgeConfigSpec.DoubleValue BASE_LOCKPICK_CHANCE;
-    public static final ForgeConfigSpec.DoubleValue LOCKPICK_BREAK_CHANCE;
-    public static final ForgeConfigSpec.IntValue MAX_TRUSTED_PLAYERS;
+    public static final ModConfigSpec.BooleanValue REQUIRE_OWNER_OFFLINE;
+    public static final ModConfigSpec.DoubleValue BASE_LOCKPICK_CHANCE;
+    public static final ModConfigSpec.DoubleValue LOCKPICK_BREAK_CHANCE;
+    public static final ModConfigSpec.IntValue MAX_TRUSTED_PLAYERS;
 
     public static Pattern[] lockableBlocks;
 
     static {
-        ForgeConfigSpec.Builder cfg = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder cfg = new ModConfigSpec.Builder();
 
         MAX_LOCKABLE_VOLUME = cfg
                 .comment("Maximum amount of blocks that can be locked at once")

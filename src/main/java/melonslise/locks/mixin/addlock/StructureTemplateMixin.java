@@ -3,7 +3,7 @@ package melonslise.locks.mixin.addlock;
 import melonslise.locks.Locks;
 import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.config.LocksCommonConfig;
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -38,7 +38,7 @@ public class StructureTemplateMixin {
     private void fillFromWorld(Level world, BlockPos start, Vec3i size, boolean takeEntities, @Nullable Block toIgnore, CallbackInfo ci) {
         if (size.getX() >= 1 && size.getY() >= 1 && size.getZ() >= 1) {
             this.lockableInfos.clear();
-            ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
+            ILockableHandler handler = world.getData(LocksAttachments.LOCKABLE_HANDLER);
             Cuboid6i bb = new Cuboid6i(start, start.offset(size.getX() - 1, size.getY() - 1, size.getZ() - 1));
             handler.getLoaded().values().stream()
                     .filter(lkb -> lkb.bb.intersects(bb))
@@ -60,7 +60,7 @@ public class StructureTemplateMixin {
             Locks.LOGGER.warn(world + "#getLevel threw an error! Skipping lockable placement for this template ");
             return;
         }
-        ILockableHandler handler = level.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
+        ILockableHandler handler = level.getData(LocksAttachments.LOCKABLE_HANDLER);
         for (LockableInfo lkb : this.lockableInfos) {
             BlockPos pos1 = LocksUtil.transform(lkb.bb.x1, lkb.bb.y1, lkb.bb.z1, settings);
             BlockPos pos2 = LocksUtil.transform(lkb.bb.x2, lkb.bb.y2, lkb.bb.z2, settings);

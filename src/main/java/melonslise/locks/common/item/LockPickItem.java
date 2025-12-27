@@ -25,7 +25,6 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.NetworkHooks;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -104,7 +103,9 @@ public class LockPickItem extends Item
 		if(world.isClientSide)
 			return InteractionResult.SUCCESS;
 		InteractionHand hand = ctx.getHand();
-		NetworkHooks.openScreen((ServerPlayer) player, new LockPickingContainer.Provider(hand, lkb), new LockPickingContainer.Writer(hand, lkb));
+		player.openMenu(new LockPickingContainer.Provider(hand, lkb), buf -> {
+			new LockPickingContainer.Writer(hand, lkb).accept(buf);
+		});
 		return InteractionResult.SUCCESS;
 	}
 
