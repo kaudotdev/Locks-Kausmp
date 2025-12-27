@@ -4,8 +4,8 @@ import melonslise.locks.client.gui.KeyRingScreen;
 import melonslise.locks.client.gui.LockPickingScreen;
 import melonslise.locks.common.init.LocksContainerTypes;
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public final class LocksScreens

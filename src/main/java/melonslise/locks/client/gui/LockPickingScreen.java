@@ -20,9 +20,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -98,7 +98,7 @@ public class LockPickingScreen extends AbstractContainerScreen<LockPickingContai
     }
 
     public static ResourceLocation getTextureFor(ItemStack stack) {
-        return new ResourceLocation(Locks.ID, "textures/gui/" + ForgeRegistries.ITEMS.getKey(stack.getItem()).getPath() + ".png");
+        return new ResourceLocation(Locks.ID, "textures/gui/" + net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath() + ".png");
     }
 
     public Sprite addSprite(Sprite sprite) {

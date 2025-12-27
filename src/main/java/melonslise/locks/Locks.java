@@ -4,9 +4,9 @@ import melonslise.locks.common.config.LocksClientConfig;
 import melonslise.locks.common.config.LocksCommonConfig;
 import melonslise.locks.common.config.LocksServerConfig;
 import melonslise.locks.common.init.*;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig.Type;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig.Type;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

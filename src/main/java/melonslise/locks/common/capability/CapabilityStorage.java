@@ -1,6 +1,6 @@
 package melonslise.locks.common.capability;
 
-import net.minecraftforge.common.util.INBTSerializable;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 
 public class CapabilityStorage<A extends INBTSerializable>
 {
