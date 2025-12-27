@@ -89,13 +89,13 @@ public final class LocksClientForgeEvents {
             return;
         if (holdingPick(mc.player)) {
             PoseStack mtx = e.getGuiGraphics().pose();
-            float partialTick = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
+            float partialTick = e.getPartialTick().getGameTimeDeltaPartialTick(true);
             Vector3f vec = LocksClientUtil.worldToScreen(tooltipLockable.getLockState(mc.level).pos, partialTick);
             if (vec.z() < 0d) {
                 mtx.pushPose();
                 mtx.translate(vec.x(), vec.y(), 0f);
-                var tooltipContext = mc.player.level().registryAccess();
-                renderHudTooltip(mtx, Lists.transform(tooltipLockable.stack.getTooltipLines(Item.TooltipContext.of(mc.player.level()), mc.player, mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL), Component::getVisualOrderText), mc.font);
+                var tooltipContext = ItemStack.TooltipContext.of(mc.player.level());
+                renderHudTooltip(mtx, Lists.transform(tooltipLockable.stack.getTooltipLines(tooltipContext, mc.player, mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL), Component::getVisualOrderText), mc.font);
                 mtx.popPose();
             }
         }

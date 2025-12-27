@@ -10,9 +10,9 @@ import melonslise.locks.common.event.LocksModEvents;
 import melonslise.locks.common.init.*;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig.Type;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
@@ -28,9 +28,9 @@ public final class Locks
 
 	public Locks(IEventBus modBus, ModContainer container)
 	{
-		ModLoadingContext.get().registerConfig(Type.SERVER, LocksServerConfig.SPEC);
-		ModLoadingContext.get().registerConfig(Type.COMMON, LocksCommonConfig.SPEC);
-		ModLoadingContext.get().registerConfig(Type.CLIENT, LocksClientConfig.SPEC);
+		container.registerConfig(ModConfig.Type.SERVER, LocksServerConfig.SPEC);
+		container.registerConfig(ModConfig.Type.COMMON, LocksCommonConfig.SPEC);
+		container.registerConfig(ModConfig.Type.CLIENT, LocksClientConfig.SPEC);
 		
 		LocksAttachments.register(modBus);
 		LocksNetwork.register(modBus);
