@@ -1,40 +1,47 @@
 plugins {
-	id "dev.architectury.loom" version "1.7-SNAPSHOT"
-	id "maven-publish"
+	id 'net.neoforged.moddev' version '1.0.21'
+	id 'maven-publish'
 }
 
-base.archivesName = "${mod_name}-forge"
+base.archivesName = "${mod_name}-neoforge"
 version = "${mod_version}"
 
 java {
-	toolchain.languageVersion = JavaLanguageVersion.of(17)
+	toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 }
 
-def generatedResources = file("src/generated")
-
-sourceSets {
-	main {
-		resources.srcDir generatedResources
+neoForge {
+	version = project.neoforge_version
+	
+	parchment {
+		minecraftVersion = project.minecraft_version
+		mappingsVersion = project.parchment_mappings
 	}
-}
-
-loom {
-	silentMojangMappingsLicense()
-
-	forge {
-		mixinConfigs("${mod_id}.mixins.json")
-		accessTransformer(file("src/main/resources/META-INF/accesstransformer.cfg"))
+	
+	mods {
+		locks {
+			sourceSet sourceSets.main
+		}
 	}
-
+	
 	runs {
+		client {
+			client()
+		}
+		server {
+			server()
+		}
 		data {
 			data()
-			programArgs "--all", "--mod", "${mod_id}"
-			programArgs "--output", generatedResources.absolutePath
+			programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources').getAbsolutePath(), '--existing', file('src/main/resources').getAbsolutePath()
 		}
+	}
+	
+	accessTransformers {
+		file('src/main/resources/META-INF/accesstransformer.cfg')
 	}
 }
 
@@ -45,33 +52,18 @@ repositories {
 			includeGroup("curse.maven")
 		}
 	}
-	maven {
-		url = "https://maven.parchmentmc.org"
-		content {
-			includeGroup("org.parchmentmc.data")
-		}
-	}
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.layered {
-		officialMojangMappings()
-		parchment("org.parchmentmc.data:parchment-${project.minecraft_version}:${project.parchment_mappings}@zip")
-	}
-	forge "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
-	modCompileOnly("curse.maven:lootr-361276:5636598")
-	modCompileOnly("curse.maven:dungeon-crawl-324973:4612224")
-//	modCompileOnly("curse.maven:beans-backpacks-946775:5368249")
-	modRuntimeOnly("curse.maven:lootr-361276:5636598")
-//	modRuntimeOnly("curse.maven:quark-243121:5594847")
-//	modRuntimeOnly("curse.maven:zeta-968868:5597406")
+	// Optional mod dependencies (commented out for now until compatible versions are available)
+	// compileOnly("curse.maven:lootr-361276:XXX")
+	// compileOnly("curse.maven:dungeon-crawl-324973:XXX")
 }
 
 tasks.named('processResources', ProcessResources).configure {
 	var replaceProperties = [
 			minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
-			forge_version: forge_version, forge_version_range: forge_version_range,
+			neoforge_version: neoforge_version, neoforge_version_range: neoforge_version_range,
 			loader_version_range: loader_version_range,
 			mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
 			mod_author: mod_author, mod_description: mod_description, mod_icon: mod_icon, credits: credits
@@ -79,7 +71,7 @@ tasks.named('processResources', ProcessResources).configure {
 
 	inputs.properties replaceProperties
 
-	filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+	filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
 		expand replaceProperties + [project: project]
 	}}
 
@@ -99,5 +91,5 @@ tasks.named('jar', Jar).configure {
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
-	options.release = 17
+	options.release = 21
 }
