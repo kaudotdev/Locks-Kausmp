@@ -3,13 +3,14 @@ package melonslise.locks.common.init;
 import melonslise.locks.Locks;
 import melonslise.locks.common.item.*;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.ForgeRegistries;
 import net.neoforged.neoforge.registries.RegistryObject;
 
 import java.util.function.Supplier;
@@ -30,7 +31,7 @@ public final class LocksItems {
                     .build()
     );
 
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.ITEM, Locks.ID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, Locks.ID);
 
     public static final RegistryObject<Item>
             SPRING = add("spring", () -> new Item(new Item.Properties())),

@@ -12,20 +12,17 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.capabilities.ForgeCapabilities;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
-import net.neoforged.neoforge.network.IContainerFactory;
 
 import java.util.function.Consumer;
 
 public class KeyRingContainer extends AbstractContainerMenu
 {
-	public static class KeyRingSlot extends SlotItemHandler
+	// TODO: Remove SlotItemHandler - needs Item Data Attachment implementation
+	public static class KeyRingSlot extends Slot
 	{
 		public final Player player;
 
-		public KeyRingSlot(Player player, IItemHandler inv, int index, int x, int y)
+		public KeyRingSlot(Player player, Inventory inv, int index, int x, int y)
 		{
 			super(inv, index, x, y);
 			this.player = player;
@@ -50,7 +47,7 @@ public class KeyRingContainer extends AbstractContainerMenu
 	}
 
 	public final ItemStack stack;
-	public final IItemHandler inv;
+	// TODO: Replace with Item Data Attachment
 	public final int rows;
 
 	public KeyRingContainer(int id, Player player, ItemStack stack)
@@ -59,16 +56,7 @@ public class KeyRingContainer extends AbstractContainerMenu
 		this.stack = stack;
 		// TODO: Implement KeyRing inventory using Item Data Attachments
 		// Item capabilities were replaced with data attachments in NeoForge 1.21
-		this.inv = null; // Temporary - needs item data attachment implementation
-		
-		if (this.inv != null) {
-			this.rows = inv.getSlots() / 9;
-			for(int row = 0; row < rows; ++row)
-				for(int col = 0; col < 9; ++col)
-					this.addSlot(new KeyRingSlot(player, inv, col + row * 9, 8 + col * 18, 18 + row * 18));
-		} else {
-			this.rows = 0; // No slots if inventory is not implemented
-		}
+		this.rows = 0; // Temporary - needs item data attachment implementation
 
 		int offset = (rows - 4) * 18;
 		for(int row = 0; row < 3; ++row)
@@ -88,30 +76,15 @@ public class KeyRingContainer extends AbstractContainerMenu
 	@Override
 	public ItemStack quickMoveStack(Player player, int index)
 	{
-		ItemStack stack = ItemStack.EMPTY;
-		Slot slot = this.slots.get(index);
-		if(slot == null || !slot.hasItem())
-			return stack;
-		ItemStack stack1 = slot.getItem();
-		stack = stack1.copy();
-		if(index < this.inv.getSlots())
-		{
-			if(!this.moveItemStackTo(stack1, this.inv.getSlots(), this.slots.size(), true))
-				return ItemStack.EMPTY;
-		}
-		else if(!this.moveItemStackTo(stack1, 0, this.inv.getSlots(), false))
-			return ItemStack.EMPTY;
-		if(stack1.isEmpty())
-			slot.set(ItemStack.EMPTY);
-		else
-			slot.setChanged();
-		return stack;
+		// TODO: Implement when item data attachment is ready
+		return ItemStack.EMPTY;
 	}
 
-	public static final IContainerFactory<KeyRingContainer> FACTORY = (id, inv, buffer) ->
+	// Container factory for network-based menu opening
+	public static KeyRingContainer create(int id, Inventory inv, FriendlyByteBuf buffer)
 	{
 		return new KeyRingContainer(id, inv.player, inv.player.getItemInHand(buffer.readEnum(InteractionHand.class)));
-	};
+	}
 
 	public static class Provider implements MenuProvider
 	{

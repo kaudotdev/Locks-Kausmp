@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import melonslise.locks.Locks;
 import melonslise.locks.common.init.LocksAttachments;
 import melonslise.locks.common.util.Lockable;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -43,7 +44,7 @@ public class LockableStorage implements ILockableStorage {
     }
 
     @Override
-    public ListTag serializeNBT() {
+    public ListTag serializeNBT(HolderLookup.Provider registries) {
         ListTag list = new ListTag();
         for (Lockable lkb : this.lockables.values())
             list.add(Lockable.toNbt(lkb));
@@ -51,7 +52,7 @@ public class LockableStorage implements ILockableStorage {
     }
 
     @Override
-    public void deserializeNBT(ListTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider registries, ListTag nbt) {
         if (this.chunk == null || this.chunk.getLevel() == null) {
             return;
         }

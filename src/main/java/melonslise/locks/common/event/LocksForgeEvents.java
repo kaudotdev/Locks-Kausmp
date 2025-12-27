@@ -55,16 +55,7 @@ public final class LocksForgeEvents {
     }
 
     // AttachCapabilitiesEvent no longer exists in NeoForge 1.21 - use Data Attachments instead
-
-    @SubscribeEvent
-    public static void attachCapabilitiesToChunk(AttachCapabilitiesEvent<LevelChunk> e) {
-        LocksCapabilities.attachToChunk(e);
-    }
-
-    @SubscribeEvent
-    public static void attachCapabilitiesToEntity(AttachCapabilitiesEvent<Entity> e) {
-        LocksCapabilities.attachToEntity(e);
-    }
+    // Data Attachments are registered in LocksAttachments.java and automatically attached
 
 	/*
 	@SubscribeEvent(priority = EventPriority.HIGH)
@@ -149,14 +140,14 @@ public final class LocksForgeEvents {
 //        }
         if (e.getHand() != InteractionHand.MAIN_HAND) // FIXME Better way to prevent firing multiple times
         {
-            e.setUseBlock(Event.Result.DENY);
+            e.setUseBlock(InteractionResult.FAIL);
             return;
         }
         ItemStack stack = e.getItemStack();
         Optional<Lockable> locked = Arrays.stream(intersect).filter(LocksPredicates.LOCKED).findFirst();
         if (locked.isPresent()) {
             Lockable lkb = locked.get();
-            e.setUseBlock(Event.Result.DENY);
+            e.setUseBlock(InteractionResult.FAIL);
             Item item = stack.getItem();
             // FIXME erase this ugly ass hard coded shit from the face of the earth and make a proper way to do this (maybe mixin to where the right click event is fired from)
             if (!stack.is(LocksItemTags.LOCK_PICKS) && item != LocksItems.MASTER_KEY.get() && (!stack.is(LocksItemTags.KEYS) || LockingItem.getOrSetId(stack) != lkb.lock.id) && (item != LocksItems.KEY_RING.get() || !KeyRingItem.containsId(stack, lkb.lock.id))) {
@@ -172,7 +163,7 @@ public final class LocksForgeEvents {
             Lockable[] match = Arrays.stream(intersect).filter(LocksPredicates.NOT_LOCKED).toArray(Lockable[]::new);
             if (match.length == 0)
                 return;
-            e.setUseBlock(Event.Result.DENY);
+            e.setUseBlock(InteractionResult.FAIL);
             world.playSound(player, pos, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 0.8f, 0.8f + world.random.nextFloat() * 0.4f);
             player.swing(InteractionHand.MAIN_HAND);
             if (!world.isClientSide)

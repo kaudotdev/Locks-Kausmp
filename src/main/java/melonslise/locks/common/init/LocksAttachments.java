@@ -32,7 +32,7 @@ public final class LocksAttachments {
 
     public static final Supplier<AttachmentType<Selection>> SELECTION = 
         ATTACHMENT_TYPES.register("selection", () -> 
-            AttachmentType.serializable(Selection::new).build()
+            AttachmentType.builder(Selection::new).build()
         );
 
     private LocksAttachments() {}

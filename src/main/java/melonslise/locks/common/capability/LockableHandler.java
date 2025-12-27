@@ -11,6 +11,7 @@ import melonslise.locks.common.network.toclient.RemoveLockablePacket;
 import melonslise.locks.common.network.toclient.UpdateLockablePacket;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -153,13 +154,13 @@ public class LockableHandler implements ILockableHandler
 	}
 
 	@Override
-	public IntTag serializeNBT()
+	public IntTag serializeNBT(HolderLookup.Provider registries)
 	{
 		return IntTag.valueOf(this.lastId.get());
 	}
 
 	@Override
-	public void deserializeNBT(IntTag nbt)
+	public void deserializeNBT(HolderLookup.Provider registries, IntTag nbt)
 	{
 		this.lastId.set(nbt.getAsInt());
 	}

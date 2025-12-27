@@ -32,7 +32,6 @@ import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
@@ -43,7 +42,7 @@ import org.joml.Vector3f;
 
 import java.util.List;
 
-@EventBusSubscriber(modid = Locks.ID, value = Dist.CLIENT)
+// Event registration done manually in Locks.java mod constructor
 public final class LocksClientForgeEvents {
     public static Lockable tooltipLockable;
 
