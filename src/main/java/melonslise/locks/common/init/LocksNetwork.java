@@ -3,18 +3,20 @@ package melonslise.locks.common.init;
 import melonslise.locks.Locks;
 import melonslise.locks.common.network.toclient.*;
 import melonslise.locks.common.network.toserver.TryPinPacket;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-@Mod.EventBusSubscriber(modid = Locks.ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class LocksNetwork
 {
 	private LocksNetwork() {}
 
-	@SubscribeEvent
-	public static void register(RegisterPayloadHandlersEvent event)
+	public static void register(IEventBus modBus)
+	{
+		modBus.addListener(LocksNetwork::onRegisterPayloads);
+	}
+	
+	private static void onRegisterPayloads(RegisterPayloadHandlersEvent event)
 	{
 		PayloadRegistrar registrar = event.registrar(Locks.ID).versioned("1.0");
 		

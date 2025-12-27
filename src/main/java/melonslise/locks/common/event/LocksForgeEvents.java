@@ -39,25 +39,22 @@ import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.village.VillagerTradesEvent;
 import net.neoforged.neoforge.event.village.WandererTradesEvent;
 import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventBusSubscriber;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-@Mod.EventBusSubscriber(modid = Locks.ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = Locks.ID)
 public final class LocksForgeEvents {
     public static final Component LOCKED_MESSAGE = Component.translatable(Locks.ID + ".status.locked");
 
     private LocksForgeEvents() {
     }
 
-    @SubscribeEvent
-    public static void attachCapabilitiesToWorld(AttachCapabilitiesEvent<Level> e) {
-        LocksCapabilities.attachToWorld(e);
-    }
+    // AttachCapabilitiesEvent no longer exists in NeoForge 1.21 - use Data Attachments instead
 
     @SubscribeEvent
     public static void attachCapabilitiesToChunk(AttachCapabilitiesEvent<LevelChunk> e) {

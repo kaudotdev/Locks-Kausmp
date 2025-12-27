@@ -24,7 +24,7 @@ public class KeyRingScreen extends AbstractContainerScreen<KeyRingContainer>
 	@Override
 	public void render(GuiGraphics mtx, int mouseX, int mouseY, float partialTick)
 	{
-		this.renderBackground(mtx);
+		this.renderBackground(mtx, 0, 0, 0);
 		super.render(mtx, mouseX, mouseY, partialTick);
 		this.renderTooltip(mtx, mouseX, mouseY);
 	}

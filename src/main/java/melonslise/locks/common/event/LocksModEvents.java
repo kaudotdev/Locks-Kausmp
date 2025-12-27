@@ -3,11 +3,11 @@ package melonslise.locks.common.event;
 import melonslise.locks.Locks;
 import melonslise.locks.common.config.LocksCommonConfig;
 import melonslise.locks.common.config.LocksServerConfig;
+import net.neoforged.bus.api.EventBusSubscriber;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.config.ModConfigEvent;
 
-@Mod.EventBusSubscriber(modid = Locks.ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = Locks.ID)
 public final class LocksModEvents
 {
 	private LocksModEvents() {}

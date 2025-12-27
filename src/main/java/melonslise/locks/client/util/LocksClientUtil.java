@@ -96,7 +96,9 @@ public final class LocksClientUtil
 		}
 
 		Window w = mc.getWindow();
-		float sc = w.getGuiScaledHeight() / 2f / pos1.z() / (float) Math.tan(Math.toRadians(mc.gameRenderer.getFov(cam, partialTicks, true) / 2f));
+		// getFov is now private - use a reasonable default FOV value
+		float fov = 70.0f; // Default Minecraft FOV
+		float sc = w.getGuiScaledHeight() / 2f / pos1.z() / (float) Math.tan(Math.toRadians(fov / 2f));
 		pos1.mul(-sc, -sc, 1f);
 		pos1.add(w.getGuiScaledWidth() / 2f, w.getGuiScaledHeight() / 2f, 0f);
 

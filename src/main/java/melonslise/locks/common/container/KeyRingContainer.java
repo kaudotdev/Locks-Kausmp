@@ -57,12 +57,18 @@ public class KeyRingContainer extends AbstractContainerMenu
 	{
 		super(LocksContainerTypes.KEY_RING.get(), id);
 		this.stack = stack;
-		this.inv = stack.getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
-
-		this.rows = inv.getSlots() / 9;
-		for(int row = 0; row < rows; ++row)
-			for(int col = 0; col < 9; ++col)
-				this.addSlot(new KeyRingSlot(player, inv, col + row * 9, 8 + col * 18, 18 + row * 18));
+		// TODO: Implement KeyRing inventory using Item Data Attachments
+		// Item capabilities were replaced with data attachments in NeoForge 1.21
+		this.inv = null; // Temporary - needs item data attachment implementation
+		
+		if (this.inv != null) {
+			this.rows = inv.getSlots() / 9;
+			for(int row = 0; row < rows; ++row)
+				for(int col = 0; col < 9; ++col)
+					this.addSlot(new KeyRingSlot(player, inv, col + row * 9, 8 + col * 18, 18 + row * 18));
+		} else {
+			this.rows = 0; // No slots if inventory is not implemented
+		}
 
 		int offset = (rows - 4) * 18;
 		for(int row = 0; row < 3; ++row)
