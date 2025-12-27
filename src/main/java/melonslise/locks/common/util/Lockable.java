@@ -97,7 +97,7 @@ public class Lockable extends Observable implements Observer
 
 	public static Lockable fromNbt(CompoundTag nbt)
 	{
-		return new Lockable(Cuboid6i.fromNbt(nbt.getCompound(KEY_BB)), Lock.fromNbt(nbt.getCompound(KEY_LOCK)), Transform.values()[(int) nbt.getByte(KEY_TRANSFORM)], ItemStack.of(nbt.getCompound(KEY_STACK)), nbt.getInt(KEY_ID));
+		return new Lockable(Cuboid6i.fromNbt(nbt.getCompound(KEY_BB)), Lock.fromNbt(nbt.getCompound(KEY_LOCK)), Transform.values()[(int) nbt.getByte(KEY_TRANSFORM)], ItemStack.parseOptional(net.minecraft.core.HolderLookup.Provider.create(), nbt.getCompound(KEY_STACK)), nbt.getInt(KEY_ID));
 	}
 
 	public static CompoundTag toNbt(Lockable lkb)
@@ -118,7 +118,7 @@ public class Lockable extends Observable implements Observer
 
 	public static Lockable fromBuf(FriendlyByteBuf buf)
 	{
-		return new Lockable(Cuboid6i.fromBuf(buf), Lock.fromBuf(buf), buf.readEnum(Transform.class), buf.readItem(), buf.readInt());
+		return new Lockable(Cuboid6i.fromBuf(buf), Lock.fromBuf(buf), buf.readEnum(Transform.class), ItemStack.STREAM_CODEC.decode(buf), buf.readInt());
 	}
 
 	public static void toBuf(FriendlyByteBuf buf, Lockable lkb)

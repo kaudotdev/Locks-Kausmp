@@ -18,7 +18,6 @@ public final class LocksClientModEvents
 
 	private static void onSetup(FMLClientSetupEvent e)
 	{
-		LocksScreens.register();
 		LocksItemModelsProperties.register();
 	}
 }
