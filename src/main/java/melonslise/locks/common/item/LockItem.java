@@ -40,13 +40,24 @@ public class LockItem extends LockingItem
 	public final int length;
 	public final int enchantmentValue;
 	public final int resistance;
+	public final int pins;
+	public final int strength;
+	public final boolean sturdy;
 
 	public LockItem(int length, int enchVal, int resist, Properties props)
+	{
+		this(length, enchVal, resist, Math.min(Math.max(length, 3), 7), 1, false, props);
+	}
+	
+	public LockItem(int length, int enchVal, int resist, int pins, int strength, boolean sturdy, Properties props)
 	{
 		super(props);
 		this.length = length;
 		this.enchantmentValue = enchVal;
 		this.resistance = resist;
+		this.pins = Math.min(Math.max(pins, 3), 7);
+		this.strength = Math.min(Math.max(strength, 1), 5);
+		this.sturdy = sturdy;
 	}
 
 	public static final String KEY_OPEN = "Open";

@@ -48,8 +48,26 @@ public class Lock extends Observable
 
 	public static Lock from(ItemStack stack, Player placer)
 	{
-		Lock lock = new Lock(LockingItem.getOrSetId(stack), LockItem.getOrSetLength(stack), !LockItem.isOpen(stack));
-		// Load additional properties from NBT if they exist
+		int length = LockItem.getOrSetLength(stack);
+		int id = LockingItem.getOrSetId(stack);
+		boolean locked = !LockItem.isOpen(stack);
+		
+		// Default values
+		int pins = Math.min(Math.max(length, 3), 7);
+		int strength = 1;
+		boolean sturdy = false;
+		
+		// Get values from LockItem if possible
+		if(stack.getItem() instanceof LockItem lockItem)
+		{
+			pins = lockItem.pins;
+			strength = lockItem.strength;
+			sturdy = lockItem.sturdy;
+		}
+		
+		Lock lock = new Lock(id, length, locked, pins, strength, sturdy, null, new HashSet<>());
+		
+		// Load additional properties from NBT if they exist (override item defaults)
 		if(stack.hasTag() && stack.getTag().contains("LockData"))
 		{
 			CompoundTag lockData = stack.getTag().getCompound("LockData");
@@ -58,6 +76,7 @@ public class Lock extends Observable
 			if(lockData.contains("Sturdy")) lock.sturdy = lockData.getBoolean("Sturdy");
 			if(lockData.contains("Owner")) lock.owner = lockData.getUUID("Owner");
 		}
+		
 		// Set owner if not already set and placer is provided
 		if(lock.owner == null && placer != null)
 		{

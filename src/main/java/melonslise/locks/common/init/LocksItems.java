@@ -38,11 +38,13 @@ public final class LocksItems {
             IRON_LOCK_MECHANISM = add("iron_lock_mechanism", () -> new Item(new Item.Properties())),
             STEEL_LOCK_MECHANISM = add("steel_lock_mechanism", () -> new Item(new Item.Properties())),
             KEY_BLANK = add("key_blank", () -> new Item(new Item.Properties())),
-            WOOD_LOCK = add("wood_lock", () -> new LockItem(5, 15, 4, new Item.Properties())),
-            IRON_LOCK = add("iron_lock", () -> new LockItem(7, 14, 12, new Item.Properties())),
-            STEEL_LOCK = add("steel_lock", () -> new LockItem(9, 12, 20, new Item.Properties())),
-            GOLD_LOCK = add("gold_lock", () -> new LockItem(6, 22, 6, new Item.Properties())),
-            DIAMOND_LOCK = add("diamond_lock", () -> new LockItem(11, 10, 100, new Item.Properties())),
+            // Lock variants with different pins, strength, and sturdy values
+            // LockItem(length, enchantmentValue, resistance, pins, strength, sturdy, properties)
+            WOOD_LOCK = add("wood_lock", () -> new LockItem(5, 15, 4, 3, 1, false, new Item.Properties())),
+            IRON_LOCK = add("iron_lock", () -> new LockItem(7, 14, 12, 5, 2, false, new Item.Properties())),
+            STEEL_LOCK = add("steel_lock", () -> new LockItem(9, 12, 20, 7, 3, true, new Item.Properties())),
+            GOLD_LOCK = add("gold_lock", () -> new LockItem(6, 22, 6, 4, 1, false, new Item.Properties())),
+            DIAMOND_LOCK = add("diamond_lock", () -> new LockItem(11, 10, 100, 7, 5, true, new Item.Properties())),
             KEY = add("key", () -> new KeyItem(new Item.Properties())),
             MASTER_KEY = add("master_key", () -> new MasterKeyItem(new Item.Properties())),
             KEY_RING = add("key_ring", () -> new KeyRingItem(1, new Item.Properties())),
