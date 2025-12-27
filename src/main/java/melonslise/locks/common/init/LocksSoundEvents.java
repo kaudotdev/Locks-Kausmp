@@ -4,16 +4,15 @@ import melonslise.locks.Locks;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.neoforged.fml.ModContainer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 public final class LocksSoundEvents
 {
 	public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, Locks.ID);
 
-	public static final RegistryObject<SoundEvent>
+	public static final DeferredHolder<SoundEvent, SoundEvent>
 		KEY_RING = add("key_ring"),
 		LOCK_CLOSE = add("lock.close"),
 		LOCK_OPEN = add("lock.open"),
@@ -29,7 +28,7 @@ public final class LocksSoundEvents
 		SOUND_EVENTS.register(bus);
 	}
 
-	public static RegistryObject<SoundEvent> add(String name)
+	public static DeferredHolder<SoundEvent, SoundEvent> add(String name)
 	{
 		return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Locks.ID, name)));
 	}

@@ -5,6 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.neoforged.bus.api.IEventBus;
 
 public final class LocksEnchantments
 {
@@ -17,7 +18,7 @@ public final class LocksEnchantments
 
 	private LocksEnchantments() {}
 
-	public static void register()
+	public static void register(IEventBus bus)
 	{
 		// No-op: Enchantments are now registered via datapack JSON files
 		// See src/main/resources/data/locks/enchantment/

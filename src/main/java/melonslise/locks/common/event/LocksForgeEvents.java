@@ -39,15 +39,12 @@ import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.village.VillagerTradesEvent;
 import net.neoforged.neoforge.event.village.WandererTradesEvent;
 import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.EventBusSubscriber;
 import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-@EventBusSubscriber(modid = Locks.ID)
 public final class LocksForgeEvents {
     public static final Component LOCKED_MESSAGE = Component.translatable(Locks.ID + ".status.locked");
 

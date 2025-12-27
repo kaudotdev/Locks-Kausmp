@@ -10,7 +10,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.NavigableMap;
