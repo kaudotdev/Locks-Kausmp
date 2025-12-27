@@ -30,10 +30,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.neoforged.neoforge.event.AttachCapabilitiesEvent;
 import net.neoforged.neoforge.event.LootTableLoadEvent;
-import net.neoforged.neoforge.event.TickEvent;
-import net.neoforged.neoforge.event.TickEvent.Phase;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -189,13 +187,11 @@ public final class LocksForgeEvents {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent e) {
-        if (e.phase != Phase.START)
-            return;
-        ISelection select = e.player.getData(LocksAttachments.SELECTION);
+    public static void onPlayerTick(PlayerTickEvent.Post e) {
+        ISelection select = e.getEntity().getData(LocksAttachments.SELECTION);
         if (select == null || select.get() == null)
             return;
-        for (ItemStack stack : e.player.getHandSlots())
+        for (ItemStack stack : e.getEntity().getHandSlots())
             if (stack.is(LocksItemTags.LOCKS))
                 return;
         select.set(null);

@@ -3,23 +3,57 @@ package melonslise.locks.common.init;
 import melonslise.locks.Locks;
 import melonslise.locks.common.network.toclient.*;
 import melonslise.locks.common.network.toserver.TryPinPacket;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.NetworkRegistry;
-import net.neoforged.neoforge.network.simple.SimpleChannel;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
+@Mod.EventBusSubscriber(modid = Locks.ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class LocksNetwork
 {
-	public static final SimpleChannel MAIN = NetworkRegistry.newSimpleChannel(new ResourceLocation(Locks.ID, "main"), () -> "locks", a -> true, a -> true);
-
 	private LocksNetwork() {}
 
-	public static void register()
+	@SubscribeEvent
+	public static void register(RegisterPayloadHandlersEvent event)
 	{
-		MAIN.registerMessage(0, AddLockablePacket.class, AddLockablePacket::encode, AddLockablePacket::decode, AddLockablePacket::handle);
-		MAIN.registerMessage(1, AddLockableToChunkPacket.class, AddLockableToChunkPacket::encode, AddLockableToChunkPacket::decode, AddLockableToChunkPacket::handle);
-		MAIN.registerMessage(2, RemoveLockablePacket.class, RemoveLockablePacket::encode, RemoveLockablePacket::decode, RemoveLockablePacket::handle);
-		MAIN.registerMessage(3, UpdateLockablePacket.class, UpdateLockablePacket::encode, UpdateLockablePacket::decode, UpdateLockablePacket::handle);
-		MAIN.registerMessage(4, TryPinPacket.class, TryPinPacket::encode, TryPinPacket::decode, TryPinPacket::handle);
-		MAIN.registerMessage(5, TryPinResultPacket.class, TryPinResultPacket::encode, TryPinResultPacket::decode, TryPinResultPacket::handle);
+		PayloadRegistrar registrar = event.registrar(Locks.ID).versioned("1.0");
+		
+		// Client-bound packets
+		registrar.playToClient(
+			AddLockablePacket.TYPE,
+			AddLockablePacket.STREAM_CODEC,
+			AddLockablePacket::handle
+		);
+		
+		registrar.playToClient(
+			AddLockableToChunkPacket.TYPE,
+			AddLockableToChunkPacket.STREAM_CODEC,
+			AddLockableToChunkPacket::handle
+		);
+		
+		registrar.playToClient(
+			RemoveLockablePacket.TYPE,
+			RemoveLockablePacket.STREAM_CODEC,
+			RemoveLockablePacket::handle
+		);
+		
+		registrar.playToClient(
+			UpdateLockablePacket.TYPE,
+			UpdateLockablePacket.STREAM_CODEC,
+			UpdateLockablePacket::handle
+		);
+		
+		registrar.playToClient(
+			TryPinResultPacket.TYPE,
+			TryPinResultPacket.STREAM_CODEC,
+			TryPinResultPacket::handle
+		);
+		
+		// Server-bound packets
+		registrar.playToServer(
+			TryPinPacket.TYPE,
+			TryPinPacket.STREAM_CODEC,
+			TryPinPacket::handle
+		);
 	}
 }

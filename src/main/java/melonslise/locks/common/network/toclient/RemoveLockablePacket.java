@@ -1,42 +1,38 @@
 package melonslise.locks.common.network.toclient;
 
+import melonslise.locks.Locks;
 import melonslise.locks.common.init.LocksAttachments;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.neoforged.neoforge.network.NetworkEvent;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
+public record RemoveLockablePacket(int id) implements CustomPacketPayload {
+    
+    public static final Type<RemoveLockablePacket> TYPE = 
+        new Type<>(ResourceLocation.fromNamespaceAndPath(Locks.ID, "remove_lockable"));
 
-public class RemoveLockablePacket
-{
-	private final int id;
+    public static final StreamCodec<FriendlyByteBuf, RemoveLockablePacket> STREAM_CODEC = 
+        StreamCodec.of(
+            (buf, packet) -> buf.writeInt(packet.id),
+            buf -> new RemoveLockablePacket(buf.readInt())
+        );
 
-	public RemoveLockablePacket(int id)
-	{
-		this.id = id;
-	}
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
 
-	public static RemoveLockablePacket decode(FriendlyByteBuf buf)
-	{
-		return new RemoveLockablePacket(buf.readInt());
-	}
-
-	public static void encode(RemoveLockablePacket pkt, FriendlyByteBuf buf)
-	{
-		buf.writeInt(pkt.id);
-	}
-
-	public static void handle(RemoveLockablePacket pkt, Supplier<NetworkEvent.Context> ctx)
-	{
-		// Use runnable, lambda causes issues with class loading
-		ctx.get().enqueueWork(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				Minecraft.getInstance().level.getCapability(LocksCapabilities.LOCKABLE_HANDLER).ifPresent(handler -> handler.remove(pkt.id));
-			}
-		});
-		ctx.get().setPacketHandled(true);
-	}
+    public static void handle(RemoveLockablePacket packet, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (Minecraft.getInstance().level != null) {
+                var handler = Minecraft.getInstance().level.getData(LocksAttachments.LOCKABLE_HANDLER);
+                if (handler != null) {
+                    handler.remove(packet.id);
+                }
+            }
+        });
+    }
 }

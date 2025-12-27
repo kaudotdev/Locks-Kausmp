@@ -32,9 +32,9 @@ import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.neoforge.client.event.RenderGuiOverlayEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import org.joml.Matrix4f;
@@ -51,11 +51,13 @@ public final class LocksClientForgeEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent e) {
-        Minecraft mc = Minecraft.getInstance();
-        if (e.phase != TickEvent.Phase.START || mc.level == null || mc.isPaused())
-            return;
-        mc.level.getData(LocksAttachments.LOCKABLE_HANDLER).getLoaded().values().forEach(lkb -> lkb.tick());
+    public static void onClientTick(LevelTickEvent.Post e) {
+        if (e.getLevel().isClientSide()) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.level == null || mc.isPaused())
+                return;
+            mc.level.getData(LocksAttachments.LOCKABLE_HANDLER).getLoaded().values().forEach(lkb -> lkb.tick());
+        }
     }
 
     @SubscribeEvent
@@ -81,10 +83,9 @@ public final class LocksClientForgeEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiOverlayEvent.Pre e) {
+    public static void onRenderOverlay(RenderGuiEvent.Pre e) {
         if (!LocksClientConfig.OVERLAY.get()) return;
         Minecraft mc = Minecraft.getInstance();
-        // if(e.getType() != RenderGuiOverlayEvent.ElementType.ALL || tooltipLockable == null)
         if (tooltipLockable == null)
             return;
         if (holdingPick(mc.player)) {

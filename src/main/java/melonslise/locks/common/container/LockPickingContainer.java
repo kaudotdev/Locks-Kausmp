@@ -132,7 +132,7 @@ public class LockPickingContainer extends AbstractContainerMenu
 			}
 			else this.player.level().playSound(null, this.pos.x, this.pos.y, this.pos.z, LocksSoundEvents.PIN_FAIL.get(), SoundSource.BLOCKS, 1f, 1f);
 		}
-		LocksNetwork.MAIN.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) this.player), new TryPinResultPacket(correct, reset));
+		PacketDistributor.sendToPlayer((ServerPlayer) this.player, new TryPinResultPacket(correct, reset));
 	}
 
 	@OnlyIn(Dist.CLIENT)

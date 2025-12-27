@@ -9,7 +9,6 @@ import melonslise.locks.client.gui.sprite.Sprite;
 import melonslise.locks.client.gui.sprite.TextureInfo;
 import melonslise.locks.client.gui.sprite.action.*;
 import melonslise.locks.common.container.LockPickingContainer;
-import melonslise.locks.common.init.LocksNetwork;
 import melonslise.locks.common.network.toserver.TryPinPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -22,6 +21,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import java.util.ArrayDeque;
@@ -218,7 +218,7 @@ public class LockPickingScreen extends AbstractContainerScreen<LockPickingContai
         if (this.pins[pin])
             return false;
         this.currPin = pin;
-        LocksNetwork.MAIN.sendToServer(new TryPinPacket((byte) pin));
+        PacketDistributor.sendToServer(new TryPinPacket((byte) pin));
         return true;
     }
 

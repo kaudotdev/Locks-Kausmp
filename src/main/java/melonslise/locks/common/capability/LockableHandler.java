@@ -6,8 +6,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import melonslise.locks.Locks;
 import melonslise.locks.common.config.LocksServerConfig;
 import melonslise.locks.common.init.LocksAttachments;
-import melonslise.locks.common.init.LocksNetwork;
-import melonslise.locks.common.init.LocksPacketDistributors;
 import melonslise.locks.common.network.toclient.AddLockablePacket;
 import melonslise.locks.common.network.toclient.RemoveLockablePacket;
 import melonslise.locks.common.network.toclient.UpdateLockablePacket;
@@ -15,8 +13,10 @@ import melonslise.locks.common.util.Lockable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.Objects;
@@ -94,8 +94,15 @@ public class LockableHandler implements ILockableHandler
 		// Do client/server extras
 		if(this.world.isClientSide)
 			lkb.swing(10);
-		else
-			LocksNetwork.MAIN.send(LocksPacketDistributors.TRACKING_AREA.with(() -> sts.stream().map(st -> ((LockableStorage) st).chunk)), new AddLockablePacket(lkb));
+		else {
+			// Send packet to all players tracking the chunks
+			for(ILockableStorage st : sts) {
+				LevelChunk chunk = ((LockableStorage) st).chunk;
+				if (this.world instanceof ServerLevel serverLevel) {
+					PacketDistributor.sendToPlayersTrackingChunk(serverLevel, chunk.getPos(), new AddLockablePacket(lkb));
+				}
+			}
+		}
 		return true;
 	}
 
@@ -120,7 +127,12 @@ public class LockableHandler implements ILockableHandler
 		// Do client/server extras
 		if(this.world.isClientSide)
 			return true;
-		LocksNetwork.MAIN.send(LocksPacketDistributors.TRACKING_AREA.with(() -> chs.stream()), new RemoveLockablePacket(id));
+		// Send packet to all players tracking the chunks
+		if (this.world instanceof ServerLevel serverLevel) {
+			for(LevelChunk ch : chs) {
+				PacketDistributor.sendToPlayersTrackingChunk(serverLevel, ch.getPos(), new RemoveLockablePacket(id));
+			}
+		}
 		return true;
 	}
 
@@ -130,7 +142,14 @@ public class LockableHandler implements ILockableHandler
 		if(this.world.isClientSide || !(o instanceof Lockable))
 			return;
 		Lockable lockable = (Lockable) o;
-		LocksNetwork.MAIN.send(LocksPacketDistributors.TRACKING_AREA.with(() -> lockable.bb.containedChunksTo((x, z) -> this.world.hasChunk(x, z) ? this.world.getChunk(x, z) : null, false).stream().filter(Objects::nonNull)), new UpdateLockablePacket(lockable));
+		if (this.world instanceof ServerLevel serverLevel) {
+			List<LevelChunk> chunks = lockable.bb.containedChunksTo((x, z) -> this.world.hasChunk(x, z) ? this.world.getChunk(x, z) : null, false);
+			for(LevelChunk chunk : chunks) {
+				if (chunk != null) {
+					PacketDistributor.sendToPlayersTrackingChunk(serverLevel, chunk.getPos(), new UpdateLockablePacket(lockable));
+				}
+			}
+		}
 	}
 
 	@Override
