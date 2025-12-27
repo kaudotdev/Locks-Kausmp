@@ -55,14 +55,14 @@ public final class LocksForgeEvents {
     // Data Attachments are registered in LocksAttachments.java and automatically attached
 
 	/*
-	@SubscribeEvent(priority = EventPriority.HIGH)
+	
 	public static void onBiomeLoad(BiomeLoadingEvent e)
 	{
 		LocksConfiguredFeatures.addTo(e);
 	}
 	*/
 
-    @SubscribeEvent
+    
     public static void onLootTableLoad(LootTableLoadEvent e) {
         // Only modify if it was a vanilla chest loot table
         ResourceLocation name = e.getName();
@@ -76,7 +76,7 @@ public final class LocksForgeEvents {
 
     }
 
-    @SubscribeEvent
+    
     public static void addVillagerTrades(VillagerTradesEvent e) {
         if (e.getType() != VillagerProfession.TOOLSMITH)
             return;
@@ -97,7 +97,7 @@ public final class LocksForgeEvents {
         trades.add(new VillagerTrades.ItemsForEmeralds(new ItemStack(LocksItems.STEEL_LOCK_MECHANISM.get()), 8, 1, 8, 30, 0.2f));
     }
 
-    @SubscribeEvent
+    
     public static void addWandererTrades(WandererTradesEvent e) {
         List<VillagerTrades.ItemListing> trades;
         trades = e.getGenericTrades();
@@ -109,7 +109,7 @@ public final class LocksForgeEvents {
         trades.add(new VillagerTrades.EnchantedItemForEmeralds(LocksItems.DIAMOND_LOCK.get(), 28, 4, 1));
     }
 
-    @SubscribeEvent
+    
     public static void onChunkUnload(ChunkEvent.Unload e) {
         LevelChunk ch = (LevelChunk) e.getChunk();
         ILockableHandler handler = ch.getLevel().getData(LocksAttachments.LOCKABLE_HANDLER);
@@ -120,7 +120,7 @@ public final class LocksForgeEvents {
         });
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    
     public static void onRightClick(PlayerInteractEvent.RightClickBlock e) {
         BlockPos pos = e.getPos();
         Level world = e.getLevel();
@@ -171,7 +171,7 @@ public final class LocksForgeEvents {
         }
     }
 
-    @SubscribeEvent
+    
     public static void onPlayerTick(PlayerTickEvent.Post e) {
         ISelection select = e.getEntity().getData(LocksAttachments.SELECTION);
         if (select == null || select.get() == null)
@@ -188,12 +188,12 @@ public final class LocksForgeEvents {
                 LocksUtil.lockedAndRelated(player.level(), pos);
     }
 
-    @SubscribeEvent
+    
     public static void onBlockBreaking(PlayerEvent.BreakSpeed e) {
         e.setCanceled(canBreakLockable(e.getEntity(), e.getPosition().get()));
     }
 
-    @SubscribeEvent
+    
     public static void onBlockBreak(BlockEvent.BreakEvent e) {
         e.setCanceled(canBreakLockable(e.getPlayer(), e.getPos()));
     }

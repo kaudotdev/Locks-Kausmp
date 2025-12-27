@@ -2,22 +2,27 @@ package melonslise.locks.common.item;
 
 import melonslise.locks.Locks;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class LockingItem extends Item
 {
+	private static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = new DecimalFormat("0.##");
+
 	public LockingItem(Properties props)
 	{
 		super(props.stacksTo(1));
@@ -27,15 +32,20 @@ public class LockingItem extends Item
 
 	public static ItemStack copyId(ItemStack from, ItemStack to)
 	{
-		to.getOrCreateTag().putInt(KEY_ID, getOrSetId(from));
+		CompoundTag nbt = to.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+		nbt.putInt(KEY_ID, getOrSetId(from));
+		to.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
 		return to;
 	}
 
 	public static int getOrSetId(ItemStack stack)
 	{
-		CompoundTag nbt = stack.getOrCreateTag();
+		CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
 		if(!nbt.contains(KEY_ID))
+		{
 			nbt.putInt(KEY_ID, ThreadLocalRandom.current().nextInt());
+			stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
+		}
 		return nbt.getInt(KEY_ID);
 	}
 
@@ -48,9 +58,10 @@ public class LockingItem extends Item
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> lines, TooltipFlag flag)
+	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag)
 	{
-		if(stack.hasTag() && stack.getTag().contains(KEY_ID))
-			lines.add(Component.translatable(Locks.ID + ".tooltip.id", ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(getOrSetId(stack))).withStyle(ChatFormatting.DARK_GREEN));
+		CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+		if(nbt.contains(KEY_ID))
+			lines.add(Component.translatable(Locks.ID + ".tooltip.id", ATTRIBUTE_MODIFIER_FORMAT.format(getOrSetId(stack))).withStyle(ChatFormatting.DARK_GREEN));
 	}
 }

@@ -13,6 +13,7 @@ import melonslise.locks.common.util.Transform;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
@@ -22,6 +23,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ChestBlock;
@@ -33,6 +35,7 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class LockItem extends LockingItem
@@ -61,15 +64,19 @@ public class LockItem extends LockingItem
 	}
 
 	public static final String KEY_OPEN = "Open";
+	private static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = new DecimalFormat("0.##");
 
 	public static boolean isOpen(ItemStack stack)
 	{
-		return stack.getOrCreateTag().getBoolean(KEY_OPEN);
+		CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+		return nbt.getBoolean(KEY_OPEN);
 	}
 
 	public static void setOpen(ItemStack stack, boolean open)
 	{
-		stack.getOrCreateTag().putBoolean(KEY_OPEN, open);
+		CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+		nbt.putBoolean(KEY_OPEN, open);
+		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
 	}
 
 	public static final String KEY_LENGTH = "Length";
@@ -77,9 +84,12 @@ public class LockItem extends LockingItem
 	// WARNING: EXPECTS LOCKITEM STACK
 	public static byte getOrSetLength(ItemStack stack)
 	{
-		CompoundTag nbt = stack.getOrCreateTag();
+		CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
 		if(!nbt.contains(KEY_LENGTH))
+		{
 			nbt.putByte(KEY_LENGTH, (byte) ((LockItem) stack.getItem()).length);
+			stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
+		}
 		return nbt.getByte(KEY_LENGTH);
 	}
 
@@ -186,9 +196,11 @@ public class LockItem extends LockingItem
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void appendHoverText(ItemStack stack, Level world, List<Component> lines, TooltipFlag flag)
+	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag)
 	{
-		super.appendHoverText(stack, world, lines, flag);
-		lines.add(Component.translatable(Locks.ID + ".tooltip.length", ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(stack.hasTag() && stack.getTag().contains(KEY_LENGTH) ? stack.getTag().getByte(KEY_LENGTH) : this.length)).withStyle(ChatFormatting.DARK_GREEN));
+		super.appendHoverText(stack, context, lines, flag);
+		CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+		byte length = nbt.contains(KEY_LENGTH) ? nbt.getByte(KEY_LENGTH) : (byte) this.length;
+		lines.add(Component.translatable(Locks.ID + ".tooltip.length", ATTRIBUTE_MODIFIER_FORMAT.format(length)).withStyle(ChatFormatting.DARK_GREEN));
 	}
 }

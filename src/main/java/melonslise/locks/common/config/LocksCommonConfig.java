@@ -75,7 +75,7 @@ public final class LocksCommonConfig {
         List<? extends Integer> weights = GENERATED_LOCK_WEIGHTS.get();
         for (int a = 0; a < locks.size(); ++a) {
             weightTotal += weights.get(a);
-            weightedGeneratedLocks.put(weightTotal, net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(new ResourceLocation(locks.get(a))));
+            weightedGeneratedLocks.put(weightTotal, net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(ResourceLocation.parse(locks.get(a))));
         }
     }
 
@@ -100,6 +100,8 @@ public final class LocksCommonConfig {
 
     public static ItemStack getRandomLock(RandomSource rng) {
         ItemStack stack = new ItemStack(weightedGeneratedLocks.ceilingEntry(rng.nextInt(weightTotal) + 1).getValue());
-        return canEnchant(rng) ? EnchantmentHelper.enchantItem(rng, stack, 5 + rng.nextInt(30), false) : stack;
+        // TODO: EnchantmentHelper.enchantItem API changed in 1.21 - needs update to new enchantment system
+        // For now, return unenchanted stack
+        return stack;
     }
 }
