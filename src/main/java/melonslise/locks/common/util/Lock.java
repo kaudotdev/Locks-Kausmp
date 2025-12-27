@@ -69,13 +69,17 @@ public class Lock extends Observable
 		Lock lock = new Lock(id, length, locked, pins, strength, sturdy, null, new HashSet<>());
 		
 		// Load additional properties from NBT if they exist (override item defaults)
-		if(stack.hasTag() && stack.getTag().contains("LockData"))
+		if(stack.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA))
 		{
-			CompoundTag lockData = stack.getTag().getCompound("LockData");
-			if(lockData.contains("Pins")) lock.pins = lockData.getInt("Pins");
-			if(lockData.contains("Strength")) lock.strength = lockData.getInt("Strength");
-			if(lockData.contains("Sturdy")) lock.sturdy = lockData.getBoolean("Sturdy");
-			if(lockData.contains("Owner")) lock.owner = lockData.getUUID("Owner");
+			net.minecraft.world.item.component.CustomData customData = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+			if(customData != null && customData.contains("LockData"))
+			{
+				CompoundTag lockData = customData.copyTag().getCompound("LockData");
+				if(lockData.contains("Pins")) lock.pins = lockData.getInt("Pins");
+				if(lockData.contains("Strength")) lock.strength = lockData.getInt("Strength");
+				if(lockData.contains("Sturdy")) lock.sturdy = lockData.getBoolean("Sturdy");
+				if(lockData.contains("Owner")) lock.owner = lockData.getUUID("Owner");
+			}
 		}
 		
 		// Set owner if not already set and placer is provided

@@ -106,7 +106,9 @@ public class Lockable extends Observable implements Observer
 		nbt.put(KEY_BB, Cuboid6i.toNbt(lkb.bb));
 		nbt.put(KEY_LOCK, Lock.toNbt(lkb.lock));
 		nbt.putByte(KEY_TRANSFORM, (byte) lkb.tr.ordinal());
-		nbt.put(KEY_STACK, lkb.stack.serializeNBT());
+		CompoundTag stackNbt = new CompoundTag();
+		lkb.stack.save(net.minecraft.core.HolderLookup.Provider.create(), stackNbt);
+		nbt.put(KEY_STACK, stackNbt);
 		nbt.putInt(KEY_ID, lkb.id);
 		return nbt;
 	}
@@ -126,7 +128,7 @@ public class Lockable extends Observable implements Observer
 		Cuboid6i.toBuf(buf, lkb.bb);
 		Lock.toBuf(buf, lkb.lock);
 		buf.writeEnum(lkb.tr);
-		buf.writeItem(lkb.stack);
+		ItemStack.STREAM_CODEC.encode(buf, lkb.stack);
 		buf.writeInt(lkb.id);
 	}
 
