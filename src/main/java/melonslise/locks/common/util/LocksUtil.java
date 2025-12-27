@@ -118,20 +118,11 @@ public final class LocksUtil {
     }
 
     public static LootTable lootTableFrom(ResourceLocation loc) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        // JsonElement json = GsonHelper.fromJson(LootTableManager.GSON, new BufferedReader(new InputStreamReader(resourceManager.getResource(loc).getInputStream(), StandardCharsets.UTF_8)), JsonElement.class);
-
-        JsonElement json = GsonHelper.fromJson(LootDataType.TABLE.parser(), new BufferedReader(new InputStreamReader(resourceManager.getResource(loc).orElseThrow().open(), StandardCharsets.UTF_8)), JsonElement.class);
-        Deque que = ForgeHooksAccessor.getLootContext().get();
-        Object lootCtx = lootTableContextConstructor.newInstance(loc, false);
-        try {
-            que.push(lootCtx);
-            return LootDataType.TABLE.parser().fromJson(json, LootTable.class);
-        } catch (JsonSyntaxException e) {
-            throw e;
-        } finally // Still executes even if catch throws according to SO!
-        {
-            que.pop();
-        }
+        // TODO: LootDataType.TABLE.parser() and ForgeHooksAccessor.getLootContext() were removed in 1.21
+        // This method needs to be reimplemented using the new loot table loading system
+        // For now, returning null to prevent compilation errors
+        // A proper implementation would use the server's LootDataManager
+        return null;
     }
 
     // Only merges entries, not conditions and functions
@@ -147,11 +138,10 @@ public final class LocksUtil {
     }
 
     public static Stream<Lockable> intersecting(Level world, BlockPos pos) {
-        return world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).lazyMap(
-                cap -> cap.getInChunk(pos).values().stream().filter(
+        return world.getData(LocksAttachments.LOCKABLE_HANDLER)
+                .getInChunk(pos).values().stream().filter(
                         lkb -> lkb.bb.intersects(pos)
-                )).orElse(Stream.empty()
-        );
+                );
     }
 
     public static boolean lockedAndRelated(Level world, BlockPos pos) {

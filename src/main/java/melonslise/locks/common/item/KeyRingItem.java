@@ -67,7 +67,12 @@ public class KeyRingItem extends Item
 	{
 		Level world = ctx.getLevel();
 		BlockPos pos = ctx.getClickedPos();
-		IItemHandler inv = ctx.getItemInHand().getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
+		// TODO: Implement Item Data Attachment for KeyRing inventory
+		// For now, commented out as ForgeCapabilities no longer exists
+		// IItemHandler inv = ctx.getItemInHand().getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
+		IItemHandler inv = null; // Temporary until Item Data Attachment is implemented
+		if(inv == null)
+			return InteractionResult.PASS;
 		List<Lockable> intersect = LocksUtil.intersecting(world, pos).collect(Collectors.toList());
 		if(intersect.isEmpty())
 			return InteractionResult.PASS;

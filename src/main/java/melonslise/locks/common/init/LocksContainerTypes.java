@@ -17,10 +17,10 @@ public final class LocksContainerTypes
 			CONTAINER_TYPES = DeferredRegister.create(BuiltInRegistries.MENU, Locks.ID);
 
 	public static final DeferredHolder<MenuType<?>, MenuType<LockPickingContainer>>
-		LOCK_PICKING = add("lock_picking", new MenuType<>(LockPickingContainer::create, FeatureFlags.DEFAULT_FLAGS));
+		LOCK_PICKING = add("lock_picking", new MenuType<>((id, inv) -> LockPickingContainer.create(id, inv, null), FeatureFlags.DEFAULT_FLAGS));
 
 	public static final DeferredHolder<MenuType<?>, MenuType<KeyRingContainer>>
-		KEY_RING = add("key_ring", new MenuType<>(KeyRingContainer::create, FeatureFlags.DEFAULT_FLAGS));
+		KEY_RING = add("key_ring", new MenuType<>((id, inv) -> KeyRingContainer.create(id, inv, null), FeatureFlags.DEFAULT_FLAGS));
 
 	private LocksContainerTypes() {}
 

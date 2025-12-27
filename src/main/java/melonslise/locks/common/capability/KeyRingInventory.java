@@ -33,13 +33,16 @@ public class KeyRingInventory implements IItemHandlerModifiable
 	public @NotNull ItemStack getStackInSlot(int slot)
 	{
 		this.validateSlotIndex(slot);
-		ListTag list = this.stack.getOrCreateTag().getList("Items", Tag.TAG_COMPOUND);
+		// Get custom data from stack
+		net.minecraft.world.item.component.CustomData customData = this.stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY);
+		CompoundTag tag = customData.copyTag();
+		ListTag list = tag.getList("Items", Tag.TAG_COMPOUND);
 		for(int a = 0; a < list.size(); a++)
 		{
 			CompoundTag nbt = list.getCompound(a);
 			if(nbt.getInt("Slot") != slot)
 				continue;
-			return ItemStack.of(nbt);
+			return ItemStack.parseOptional(net.minecraft.core.HolderLookup.Provider.create(), nbt);
 		}
 		return ItemStack.EMPTY;
 	}
@@ -53,9 +56,12 @@ public class KeyRingInventory implements IItemHandlerModifiable
 		{
 			nbt = new CompoundTag();
 			nbt.putInt("Slot", slot);
-			stack.save(nbt);
+			stack.save(net.minecraft.core.HolderLookup.Provider.create(), nbt);
 		}
-		ListTag list = this.stack.getOrCreateTag().getList("Items", Tag.TAG_COMPOUND);
+		// Get or create custom data
+		net.minecraft.world.item.component.CustomData customData = this.stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY);
+		CompoundTag tag = customData.copyTag();
+		ListTag list = tag.getList("Items", Tag.TAG_COMPOUND);
 		for(int a = 0; a < list.size(); a++)
 		{
 			CompoundTag existing = list.getCompound(a);
@@ -65,11 +71,16 @@ public class KeyRingInventory implements IItemHandlerModifiable
 				list.set(a, nbt);
 			else
 				list.remove(a);
+			tag.put("Items", list);
+			this.stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
 			return;
 		}
 		if(!stack.isEmpty())
+		{
 			list.add(nbt);
-		this.stack.getOrCreateTag().put("Items", list);
+			tag.put("Items", list);
+			this.stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+		}
 	}
 
 	@Override
@@ -82,7 +93,7 @@ public class KeyRingInventory implements IItemHandlerModifiable
 		int limit = stack.getMaxStackSize();
 		if (!existing.isEmpty())
 		{
-			if (!ItemHandlerHelper.canItemStacksStack(stack, existing))
+			if (!ItemStack.isSameItemSameComponents(stack, existing))
 				return stack;
 			limit -= existing.getCount();
 		}
@@ -92,12 +103,12 @@ public class KeyRingInventory implements IItemHandlerModifiable
 		if (!simulate)
 		{
 			if (existing.getCount() <= 0)
-				existing = reachedLimit ? ItemHandlerHelper.copyStackWithSize(stack, limit) : stack;
+				existing = reachedLimit ? stack.copyWithCount(limit) : stack;
 			else
 				existing.grow(reachedLimit ? limit : stack.getCount());
 			this.setStackInSlot(slot, existing);
 		}
-		return reachedLimit ? ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - limit) : ItemStack.EMPTY;
+		return reachedLimit ? stack.copyWithCount(stack.getCount() - limit) : ItemStack.EMPTY;
 	}
 
 	@Override
@@ -119,8 +130,8 @@ public class KeyRingInventory implements IItemHandlerModifiable
 		else
 		{
 			if (!simulate)
-				this.setStackInSlot(slot, ItemHandlerHelper.copyStackWithSize(existing, existing.getCount() - toExtract));
-			return ItemHandlerHelper.copyStackWithSize(existing, toExtract);
+				this.setStackInSlot(slot, existing.copyWithCount(existing.getCount() - toExtract));
+			return existing.copyWithCount(toExtract);
 		}
 	}
 

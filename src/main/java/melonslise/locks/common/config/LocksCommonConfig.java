@@ -75,7 +75,7 @@ public final class LocksCommonConfig {
         List<? extends Integer> weights = GENERATED_LOCK_WEIGHTS.get();
         for (int a = 0; a < locks.size(); ++a) {
             weightTotal += weights.get(a);
-            weightedGeneratedLocks.put(weightTotal, net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(ResourceLocation.parse(locks.get(a))));
+            weightedGeneratedLocks.put(weightTotal, net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ResourceLocation.parse(locks.get(a))));
         }
     }
 
